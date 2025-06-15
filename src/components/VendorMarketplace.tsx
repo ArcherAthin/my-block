@@ -2,7 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Star, Clock, Shield, Wrench, Car, Utensils, Shirt, Home } from 'lucide-react';
+import { Star, Clock, Shield, Wrench, Car, Utensils, Shirt, Home, Eye, Users } from 'lucide-react';
 
 const VendorMarketplace = () => {
   const vendors = [
@@ -72,6 +72,22 @@ const VendorMarketplace = () => {
     { name: "Other", count: "4", active: false }
   ];
 
+  const handleBookNow = (vendorName: string) => {
+    alert(`Booking ${vendorName}... This would open a booking modal in a real application.`);
+  };
+
+  const handleViewDetails = (vendorName: string) => {
+    alert(`Viewing details for ${vendorName}... This would show detailed vendor information.`);
+  };
+
+  const handleViewAllVendors = () => {
+    alert('Viewing all vendors... This would navigate to a comprehensive vendor listing page.');
+  };
+
+  const handleEmergencyCall = () => {
+    alert('Emergency service request initiated. This would connect you with available emergency services.');
+  };
+
   return (
     <section id="services" className="py-20 px-6">
       <div className="max-w-7xl mx-auto">
@@ -97,12 +113,12 @@ const VendorMarketplace = () => {
               variant={category.active ? "default" : "outline"}
               className={`${
                 category.active 
-                  ? "bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] text-white border-0" 
-                  : "border-white/30 text-white hover:bg-white/10"
+                  ? "bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] text-white border-0 hover:shadow-lg" 
+                  : "border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50"
               } backdrop-blur-md transition-all duration-300 hover:scale-105`}
             >
               {category.name}
-              <Badge className="ml-2 bg-white/20 text-xs">{category.count}</Badge>
+              <Badge className="ml-2 bg-white/20 text-xs text-white">{category.count}</Badge>
             </Button>
           ))}
         </div>
@@ -165,16 +181,22 @@ const VendorMarketplace = () => {
                   {/* Action Buttons */}
                   <div className="flex space-x-2">
                     <Button 
+                      onClick={() => handleBookNow(vendor.name)}
                       className={`flex-1 ${
                         vendor.available 
-                          ? "bg-gradient-to-r from-[#10b981] to-[#059669] text-white" 
+                          ? "bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:shadow-lg" 
                           : "bg-gray-500/50 text-white/50 cursor-not-allowed"
                       } transition-all duration-300 hover:scale-105`}
                       disabled={!vendor.available}
                     >
                       {vendor.available ? "Book Now" : "Unavailable"}
                     </Button>
-                    <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 backdrop-blur-md">
+                    <Button 
+                      onClick={() => handleViewDetails(vendor.name)}
+                      variant="outline" 
+                      className="border-white/30 text-white hover:bg-white/10 backdrop-blur-md hover:border-white/50 hover:text-white"
+                    >
+                      <Eye className="w-4 h-4 mr-1" />
                       Details
                     </Button>
                   </div>
@@ -192,10 +214,18 @@ const VendorMarketplace = () => {
               <p className="text-white/70">Connect with available vendors for urgent requests</p>
             </div>
             <div className="flex space-x-3">
-              <Button className="bg-gradient-to-r from-[#ef4444] to-[#dc2626] text-white hover:scale-105 transition-all duration-300">
+              <Button 
+                onClick={handleEmergencyCall}
+                className="bg-gradient-to-r from-[#ef4444] to-[#dc2626] text-white hover:scale-105 transition-all duration-300 hover:shadow-lg"
+              >
                 Emergency Call
               </Button>
-              <Button variant="outline" className="border-white/30 text-white hover:bg-white/10">
+              <Button 
+                onClick={handleViewAllVendors}
+                variant="outline" 
+                className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 hover:text-white"
+              >
+                <Users className="w-4 h-4 mr-2" />
                 View All Vendors
               </Button>
             </div>

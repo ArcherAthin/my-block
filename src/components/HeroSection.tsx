@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { ChevronRight, Users, Calendar, MessageSquare, Building, Star, Shield } from 'lucide-react';
+import { ChevronRight, Users, Calendar, MessageSquare, Building, Star, Shield, Play } from 'lucide-react';
 
 interface HeroSectionProps {
   scrollY: number;
@@ -43,8 +43,20 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
     return () => clearInterval(interval);
   }, []);
 
+  const handleExplorePlatform = () => {
+    const dashboardElement = document.querySelector('#dashboard');
+    if (dashboardElement) {
+      dashboardElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleWatchDemo = () => {
+    // For demo purposes, we'll show an alert. In a real app, this would open a modal or video
+    alert('Demo video would open here. This is a placeholder for the demo functionality.');
+  };
+
   return (
-    <section id="home" className="min-h-screen flex items-center justify-center px-6 py-20">
+    <section id="home" className="min-h-screen flex items-center justify-center px-6 py-20 pt-32">
       <div className="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
         {/* Left Content */}
         <div 
@@ -68,11 +80,19 @@ const HeroSection = ({ scrollY }: HeroSectionProps) => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4">
-            <Button className="bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] hover:scale-105 transition-all duration-300 text-white font-medium tracking-wide shadow-xl text-lg px-8 py-6 rounded-xl border-0">
+            <Button 
+              onClick={handleExplorePlatform}
+              className="bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] hover:scale-105 transition-all duration-300 text-white font-medium tracking-wide shadow-xl text-lg px-8 py-6 rounded-xl border-0 hover:shadow-2xl"
+            >
               Explore Platform
               <ChevronRight className="w-5 h-5 ml-2" />
             </Button>
-            <Button variant="outline" className="border-white/30 text-white hover:bg-white/10 backdrop-blur-md transition-all duration-300 text-lg px-8 py-6 rounded-xl">
+            <Button 
+              onClick={handleWatchDemo}
+              variant="outline" 
+              className="border-white/30 text-white hover:bg-white/10 backdrop-blur-md transition-all duration-300 text-lg px-8 py-6 rounded-xl hover:border-white/50 hover:text-white"
+            >
+              <Play className="w-4 h-4 mr-2" />
               Watch Demo
             </Button>
           </div>

@@ -32,8 +32,12 @@ const Index = () => {
         
         <main className="relative">
           <HeroSection scrollY={scrollY} />
-          <DashboardModules />
-          <CommitteePanel />
+          <div id="dashboard">
+            <DashboardModules />
+          </div>
+          <div id="committee">
+            <CommitteePanel />
+          </div>
           <VendorMarketplace />
           <FacilityBooking />
           <PricingSection />
