@@ -9,7 +9,6 @@ import DashboardModules from '@/components/DashboardModules';
 import CommitteePanel from '@/components/CommitteePanel';
 import VendorMarketplace from '@/components/VendorMarketplace';
 import FacilityBooking from '@/components/FacilityBooking';
-import PricingSection from '@/components/PricingSection';
 import Navigation from '@/components/Navigation';
 import Footer from '@/components/Footer';
 import FloatingBackground from '@/components/FloatingBackground';
@@ -40,7 +39,6 @@ const Index = () => {
           </div>
           <VendorMarketplace />
           <FacilityBooking />
-          <PricingSection />
         </main>
         
         <Footer />

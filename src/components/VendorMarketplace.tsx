@@ -1,236 +1,263 @@
-
-import { Card } from "@/components/ui/card";
+import { useState } from 'react';
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Star, Clock, Shield, Wrench, Car, Utensils, Shirt, Home, Eye, Users } from 'lucide-react';
+import { Star, Clock, MapPin, Phone, Mail, Calendar, ChevronRight } from 'lucide-react';
 
 const VendorMarketplace = () => {
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [showAllVendors, setShowAllVendors] = useState(false);
+
   const vendors = [
     {
-      name: "QuickFix Pro",
-      category: "Maintenance",
-      icon: Wrench,
+      id: 1,
+      name: "QuickFix Plumbing",
+      category: "maintenance",
       rating: 4.8,
-      jobs: 145,
-      responseTime: "< 2 hrs",
-      specialties: ["Plumbing", "Electrical", "AC Repair"],
-      color: "from-[#3a0ca3] to-[#f72585]",
+      reviews: 156,
+      image: "/placeholder.svg",
+      services: ["Emergency Repairs", "Installation", "Maintenance"],
+      response: "15 mins",
+      price: "₹500/hr",
+      verified: true,
       available: true
     },
     {
-      name: "CleanCar Services", 
-      category: "Automotive",
-      icon: Car,
+      id: 2,
+      name: "GreenThumb Landscaping",
+      category: "gardening",
       rating: 4.9,
-      jobs: 89,
-      responseTime: "< 1 hr",
-      specialties: ["Car Wash", "Detailing", "Oil Change"],
-      color: "from-[#f72585] to-[#4cc9f0]",
+      reviews: 203,
+      image: "/placeholder.svg",
+      services: ["Garden Design", "Maintenance", "Plant Installation"],
+      response: "2 hours",
+      price: "₹800/hr",
+      verified: true,
       available: true
     },
     {
-      name: "FreshMeals Daily",
-      category: "Food & Catering", 
-      icon: Utensils,
+      id: 3,
+      name: "SparkElectric Solutions",
+      category: "maintenance",
       rating: 4.7,
-      jobs: 67,
-      responseTime: "< 30 mins",
-      specialties: ["Daily Meals", "Party Catering", "Healthy Options"],
-      color: "from-[#4cc9f0] to-[#3a0ca3]",
+      reviews: 189,
+      image: "/placeholder.svg",
+      services: ["Wiring", "Appliance Repair", "Installation"],
+      response: "30 mins",
+      price: "₹600/hr",
+      verified: true,
       available: false
     },
     {
-      name: "LaundryMax",
-      category: "Laundry",
-      icon: Shirt,
+      id: 4,
+      name: "CleanSweep Services",
+      category: "cleaning",
       rating: 4.6,
-      jobs: 234,
-      responseTime: "< 4 hrs",
-      specialties: ["Pickup & Drop", "Dry Cleaning", "Express Service"],
-      color: "from-[#7c3aed] to-[#ec4899]",
+      reviews: 124,
+      image: "/placeholder.svg",
+      services: ["Deep Cleaning", "Regular Maintenance", "Sanitization"],
+      response: "1 hour",
+      price: "₹400/hr",
+      verified: true,
       available: true
     },
     {
-      name: "HomeHelpers",
-      category: "Cleaning",
-      icon: Home,
-      rating: 4.9,
-      jobs: 156,
-      responseTime: "< 3 hrs",
-      specialties: ["Deep Cleaning", "Regular Maintenance", "Move-in Clean"],
-      color: "from-[#10b981] to-[#3b82f6]",
+      id: 5,
+      name: "SafeGuard Security",
+      category: "security",
+      rating: 4.8,
+      reviews: 167,
+      image: "/placeholder.svg",
+      services: ["Security Systems", "CCTV Installation", "Monitoring"],
+      response: "45 mins",
+      price: "₹1200/hr",
+      verified: true,
+      available: true
+    },
+    {
+      id: 6,
+      name: "FreshMart Grocery",
+      category: "delivery",
+      rating: 4.5,
+      reviews: 234,
+      image: "/placeholder.svg",
+      services: ["Grocery Delivery", "Fresh Produce", "Bulk Orders"],
+      response: "4 hours",
+      price: "Free delivery",
+      verified: true,
       available: true
     }
   ];
 
   const categories = [
-    { name: "All Services", count: "45+", active: true },
-    { name: "Maintenance", count: "12", active: false },
-    { name: "Cleaning", count: "8", active: false },
-    { name: "Food", count: "15", active: false },
-    { name: "Transport", count: "6", active: false },
-    { name: "Other", count: "4", active: false }
+    { id: 'all', name: 'All Services', count: vendors.length },
+    { id: 'maintenance', name: 'Maintenance', count: vendors.filter(v => v.category === 'maintenance').length },
+    { id: 'cleaning', name: 'Cleaning', count: vendors.filter(v => v.category === 'cleaning').length },
+    { id: 'gardening', name: 'Gardening', count: vendors.filter(v => v.category === 'gardening').length },
+    { id: 'security', name: 'Security', count: vendors.filter(v => v.category === 'security').length },
+    { id: 'delivery', name: 'Delivery', count: vendors.filter(v => v.category === 'delivery').length }
   ];
 
-  const handleBookNow = (vendorName: string) => {
-    alert(`Booking ${vendorName}... This would open a booking modal in a real application.`);
+  const filteredVendors = selectedCategory === 'all' 
+    ? vendors 
+    : vendors.filter(vendor => vendor.category === selectedCategory);
+
+  const displayedVendors = showAllVendors ? filteredVendors : filteredVendors.slice(0, 4);
+
+  const handleBookService = (vendorName: string) => {
+    console.log(`Booking service with ${vendorName}`);
+    alert(`Booking request sent to ${vendorName}! They will contact you shortly.`);
+  };
+
+  const handleContactVendor = (vendorName: string) => {
+    console.log(`Contacting ${vendorName}`);
+    alert(`Contact details for ${vendorName} will be shared via SMS.`);
   };
 
   const handleViewDetails = (vendorName: string) => {
-    alert(`Viewing details for ${vendorName}... This would show detailed vendor information.`);
+    console.log(`Viewing details for ${vendorName}`);
+    alert(`Opening detailed profile for ${vendorName}...`);
   };
 
   const handleViewAllVendors = () => {
-    alert('Viewing all vendors... This would navigate to a comprehensive vendor listing page.');
-  };
-
-  const handleEmergencyCall = () => {
-    alert('Emergency service request initiated. This would connect you with available emergency services.');
+    console.log('View all vendors clicked');
+    setShowAllVendors(!showAllVendors);
   };
 
   return (
-    <section id="services" className="py-20 px-6">
+    <section id="services" className="py-20 px-6 relative">
       <div className="max-w-7xl mx-auto">
-        {/* Section Header */}
+        {/* Header */}
         <div className="text-center mb-16 space-y-4">
           <Badge className="bg-white/10 backdrop-blur-md border-white/20 text-white">
-            🛍️ Service Marketplace
+            🛠️ Vendor Marketplace
           </Badge>
-          <h2 className="text-4xl lg:text-5xl font-bold text-white">
-            Vendor <span className="bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] bg-clip-text text-transparent">Marketplace</span>
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+            Trusted <span className="bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] bg-clip-text text-transparent">Service Providers</span>
           </h2>
-          <p className="text-xl text-white/70 max-w-2xl mx-auto leading-relaxed">
-            Connect with trusted local service providers. Book maintenance, 
-            cleaning, food delivery, and more with verified neighborhood vendors.
+          <p className="text-xl text-white/70 max-w-3xl mx-auto">
+            Connect with verified local vendors for all your neighborhood needs
           </p>
         </div>
 
         {/* Category Filter */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
-          {categories.map((category, index) => (
+          {categories.map((category) => (
             <Button
-              key={index}
-              variant={category.active ? "default" : "outline"}
-              className={`${
-                category.active 
-                  ? "bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] text-white border-0 hover:shadow-lg" 
-                  : "border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50"
-              } backdrop-blur-md transition-all duration-300 hover:scale-105`}
+              key={category.id}
+              onClick={() => setSelectedCategory(category.id)}
+              variant={selectedCategory === category.id ? "default" : "outline"}
+              className={`rounded-full transition-all duration-300 ${
+                selectedCategory === category.id
+                  ? 'bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] text-white border-0 hover:text-white'
+                  : 'border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent'
+              }`}
             >
-              {category.name}
-              <Badge className="ml-2 bg-white/20 text-xs text-white">{category.count}</Badge>
+              {category.name} ({category.count})
             </Button>
           ))}
         </div>
 
-        {/* Vendor Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {vendors.map((vendor, index) => {
-            const IconComponent = vendor.icon;
-            return (
-              <Card key={index} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 hover:bg-white/20 transition-all duration-500 hover:scale-105 group rounded-2xl overflow-hidden">
-                <div className="space-y-6">
-                  {/* Vendor Header */}
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center space-x-4">
-                      <div className={`w-16 h-16 rounded-2xl bg-gradient-to-r ${vendor.color} flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform duration-300`}>
-                        <IconComponent className="w-8 h-8 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-lg font-bold text-white">{vendor.name}</h3>
-                        <p className="text-sm text-white/60">{vendor.category}</p>
-                      </div>
-                    </div>
-                    <div className={`w-3 h-3 rounded-full ${vendor.available ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} />
+        {/* Vendors Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-8 mb-12">
+          {displayedVendors.map((vendor, index) => (
+            <Card 
+              key={vendor.id}
+              className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl hover:scale-105 transition-all duration-300 hover:bg-white/15"
+              style={{ animationDelay: `${index * 100}ms` }}
+            >
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] flex items-center justify-center shadow-lg">
+                    <span className="text-white font-bold text-lg">
+                      {vendor.name.charAt(0)}
+                    </span>
                   </div>
-
-                  {/* Stats */}
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center">
-                      <div className="flex items-center justify-center space-x-1 mb-1">
+                  <div>
+                    <h3 className="text-xl font-bold text-white mb-1">{vendor.name}</h3>
+                    <div className="flex items-center space-x-2">
+                      <div className="flex items-center">
                         <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-white font-bold">{vendor.rating}</span>
+                        <span className="text-white/80 ml-1">{vendor.rating}</span>
                       </div>
-                      <div className="text-xs text-white/60">Rating</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-white font-bold mb-1">{vendor.jobs}</div>
-                      <div className="text-xs text-white/60">Jobs Done</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="flex items-center justify-center space-x-1 mb-1">
-                        <Clock className="w-4 h-4 text-white/60" />
-                        <span className="text-white font-bold text-xs">{vendor.responseTime}</span>
-                      </div>
-                      <div className="text-xs text-white/60">Response</div>
-                    </div>
-                  </div>
-
-                  {/* Specialties */}
-                  <div className="space-y-2">
-                    <div className="text-sm text-white/70 font-medium">Specialties:</div>
-                    <div className="flex flex-wrap gap-2">
-                      {vendor.specialties.map((specialty, specIndex) => (
-                        <Badge key={specIndex} className="bg-white/20 text-white border-white/30 text-xs">
-                          {specialty}
+                      <span className="text-white/60">({vendor.reviews} reviews)</span>
+                      {vendor.verified && (
+                        <Badge className="bg-green-500/20 text-green-400 border-green-500/30">
+                          Verified
                         </Badge>
-                      ))}
+                      )}
                     </div>
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="flex space-x-2">
-                    <Button 
-                      onClick={() => handleBookNow(vendor.name)}
-                      className={`flex-1 ${
-                        vendor.available 
-                          ? "bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:shadow-lg" 
-                          : "bg-gray-500/50 text-white/50 cursor-not-allowed"
-                      } transition-all duration-300 hover:scale-105`}
-                      disabled={!vendor.available}
-                    >
-                      {vendor.available ? "Book Now" : "Unavailable"}
-                    </Button>
-                    <Button 
-                      onClick={() => handleViewDetails(vendor.name)}
-                      variant="outline" 
-                      className="border-white/30 text-white hover:bg-white/10 backdrop-blur-md hover:border-white/50 hover:text-white"
-                    >
-                      <Eye className="w-4 h-4 mr-1" />
-                      Details
-                    </Button>
                   </div>
                 </div>
-              </Card>
-            );
-          })}
+                <div className={`w-3 h-3 rounded-full ${vendor.available ? 'bg-green-400' : 'bg-red-400'}`} />
+              </div>
+
+              <div className="space-y-4">
+                <div className="flex flex-wrap gap-2">
+                  {vendor.services.slice(0, 3).map((service, idx) => (
+                    <Badge key={idx} variant="outline" className="border-white/30 text-white/80">
+                      {service}
+                    </Badge>
+                  ))}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div className="flex items-center text-white/70">
+                    <Clock className="w-4 h-4 mr-2" />
+                    {vendor.response}
+                  </div>
+                  <div className="flex items-center text-white/70">
+                    <span className="font-medium">{vendor.price}</span>
+                  </div>
+                </div>
+
+                <div className="flex space-x-2 pt-4">
+                  <Button
+                    onClick={() => handleBookService(vendor.name)}
+                    disabled={!vendor.available}
+                    className={`flex-1 ${
+                      vendor.available 
+                        ? 'bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] hover:scale-105 text-white border-0 hover:text-white' 
+                        : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                    } transition-all duration-300`}
+                  >
+                    {vendor.available ? 'Book Now' : 'Unavailable'}
+                  </Button>
+                  <Button
+                    onClick={() => handleContactVendor(vendor.name)}
+                    variant="outline"
+                    size="icon"
+                    className="border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent"
+                  >
+                    <Phone className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    onClick={() => handleViewDetails(vendor.name)}
+                    variant="outline"
+                    size="icon"
+                    className="border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent"
+                  >
+                    <ChevronRight className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
 
-        {/* Quick Action Bar */}
-        <Card className="mt-12 p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-          <div className="flex flex-col md:flex-row items-center justify-between space-y-4 md:space-y-0">
-            <div className="text-center md:text-left">
-              <h3 className="text-xl font-bold text-white mb-2">Need Emergency Service?</h3>
-              <p className="text-white/70">Connect with available vendors for urgent requests</p>
-            </div>
-            <div className="flex space-x-3">
-              <Button 
-                onClick={handleEmergencyCall}
-                className="bg-gradient-to-r from-[#ef4444] to-[#dc2626] text-white hover:scale-105 transition-all duration-300 hover:shadow-lg"
-              >
-                Emergency Call
-              </Button>
-              <Button 
-                onClick={handleViewAllVendors}
-                variant="outline" 
-                className="border-white/30 text-white hover:bg-white/10 hover:border-white/50 hover:text-white"
-              >
-                <Users className="w-4 h-4 mr-2" />
-                View All Vendors
-              </Button>
-            </div>
+        {/* View All Button */}
+        {filteredVendors.length > 4 && (
+          <div className="text-center">
+            <Button
+              onClick={handleViewAllVendors}
+              variant="outline"
+              className="border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent px-8 py-3 rounded-xl transition-all duration-300"
+            >
+              {showAllVendors ? 'Show Less' : `View All ${filteredVendors.length} Vendors`}
+              <ChevronRight className={`w-4 h-4 ml-2 transition-transform ${showAllVendors ? 'rotate-90' : ''}`} />
+            </Button>
           </div>
-        </Card>
+        )}
       </div>
     </section>
   );
