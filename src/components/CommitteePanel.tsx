@@ -3,6 +3,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { useNavigate } from "react-router-dom";
 import { 
   Users, 
   TrendingUp, 
@@ -16,6 +17,8 @@ import {
 } from 'lucide-react';
 
 const CommitteePanel = () => {
+  const navigate = useNavigate();
+
   const governance = [
     {
       title: "Fund Management",
@@ -41,11 +44,43 @@ const CommitteePanel = () => {
   ];
 
   const recentActivities = [
-    { type: "poll", title: "New Swimming Pool Proposal", time: "2 hours ago", status: "active" },
-    { type: "expense", title: "Garden Maintenance Payment", time: "5 hours ago", status: "completed" },
-    { type: "meeting", title: "Monthly Committee Meeting", time: "1 day ago", status: "scheduled" },
-    { type: "complaint", title: "Parking Issue Resolution", time: "2 days ago", status: "resolved" }
+    { 
+      id: 1,
+      type: "poll", 
+      title: "Swimming Pool Renovation Proposal", 
+      time: "2 hours ago", 
+      status: "active",
+      route: "/poll/1"
+    },
+    { 
+      id: 2,
+      type: "expense", 
+      title: "Garden Maintenance Payment", 
+      time: "5 hours ago", 
+      status: "completed",
+      route: "/admin"
+    },
+    { 
+      id: 3,
+      type: "meeting", 
+      title: "Community Festival Celebration", 
+      time: "1 day ago", 
+      status: "scheduled",
+      route: "/event/1"
+    },
+    { 
+      id: 4,
+      type: "complaint", 
+      title: "Noise Complaint Resolution", 
+      time: "2 days ago", 
+      status: "resolved",
+      route: "/complaint/1"
+    }
   ];
+
+  const handleActivityClick = (activity: any) => {
+    navigate(activity.route);
+  };
 
   return (
     <section id="committee" className="py-20 px-6">
@@ -100,7 +135,10 @@ const CommitteePanel = () => {
                     ))}
                   </div>
 
-                  <Button className="w-full bg-gradient-to-r from-[#7873f5]/20 to-[#ff6ec4]/20 border border-white/30 text-white hover:from-[#7873f5]/30 hover:to-[#ff6ec4]/30 hover:scale-105 transition-all duration-300">
+                  <Button 
+                    onClick={() => navigate('/admin')}
+                    className="w-full bg-gradient-to-r from-[#7873f5]/20 to-[#ff6ec4]/20 border border-white/30 text-white hover:from-[#7873f5]/30 hover:to-[#ff6ec4]/30 hover:scale-105 transition-all duration-300"
+                  >
                     Manage {item.title.split(' ')[0]}
                   </Button>
                 </div>
@@ -117,8 +155,12 @@ const CommitteePanel = () => {
           </div>
           
           <div className="space-y-4">
-            {recentActivities.map((activity, index) => (
-              <div key={index} className="flex items-center justify-between p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors">
+            {recentActivities.map((activity) => (
+              <div 
+                key={activity.id} 
+                className="flex items-center justify-between p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors cursor-pointer"
+                onClick={() => handleActivityClick(activity)}
+              >
                 <div className="flex items-center space-x-4">
                   <div className={`w-3 h-3 rounded-full ${
                     activity.status === 'active' ? 'bg-blue-400' :
@@ -127,7 +169,7 @@ const CommitteePanel = () => {
                     'bg-yellow-400'
                   }`} />
                   <div>
-                    <div className="text-white font-medium">{activity.title}</div>
+                    <div className="text-white font-medium hover:text-white/90 transition-colors">{activity.title}</div>
                     <div className="text-white/60 text-sm">{activity.time}</div>
                   </div>
                 </div>

@@ -2,6 +2,7 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { 
   Home, 
   Calendar, 
@@ -17,6 +18,8 @@ import {
 } from 'lucide-react';
 
 const DashboardModules = () => {
+  const navigate = useNavigate();
+
   const modules = [
     {
       title: "Resident Dashboard",
@@ -25,7 +28,8 @@ const DashboardModules = () => {
       color: "from-[#6EE7B7] to-[#3B82F6]",
       features: ["Due Payments", "Event Calendar", "Announcements", "Quick Actions"],
       status: "Active",
-      users: "1,247"
+      users: "1,247",
+      route: "/resident-dashboard"
     },
     {
       title: "Visitor Management", 
@@ -34,7 +38,8 @@ const DashboardModules = () => {
       color: "from-[#F59E0B] to-[#EF4444]",
       features: ["QR Entry Codes", "Pre-approval", "Security Logs", "Guest Tracking"],
       status: "Enhanced",
-      users: "856"
+      users: "856",
+      route: "/visitor-management"
     },
     {
       title: "Maintenance Portal",
@@ -43,7 +48,8 @@ const DashboardModules = () => {
       color: "from-[#8B5CF6] to-[#EC4899]",
       features: ["Issue Tracking", "Photo Upload", "Progress Updates", "Rating System"],
       status: "Popular",
-      users: "692"
+      users: "692",
+      route: "/maintenance-portal"
     }
   ];
 
@@ -53,6 +59,10 @@ const DashboardModules = () => {
     { label: "This Month Events", value: "15", trend: "+25%", color: "text-blue-400" },
     { label: "Satisfaction Rate", value: "94%", trend: "+3%", color: "text-green-400" }
   ];
+
+  const handleExploreModule = (route: string) => {
+    navigate(route);
+  };
 
   return (
     <section className="py-20 px-6">
@@ -131,7 +141,10 @@ const DashboardModules = () => {
                   </div>
 
                   {/* Action Button */}
-                  <Button className="w-full bg-gradient-to-r from-[#ff6ec4]/20 to-[#7873f5]/20 border border-white/30 text-white hover:from-[#ff6ec4]/30 hover:to-[#7873f5]/30 hover:scale-105 transition-all duration-300 backdrop-blur-md">
+                  <Button 
+                    onClick={() => handleExploreModule(module.route)}
+                    className="w-full bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] text-white hover:from-[#ff6ec4]/90 hover:to-[#7873f5]/90 hover:scale-105 transition-all duration-300 border-0"
+                  >
                     Explore Module
                   </Button>
                 </div>

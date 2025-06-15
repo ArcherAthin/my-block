@@ -2,9 +2,11 @@ import { useState } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useNavigate } from "react-router-dom";
 import { Star, Clock, MapPin, Phone, Mail, Calendar, ChevronRight } from 'lucide-react';
 
 const VendorMarketplace = () => {
+  const navigate = useNavigate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [showAllVendors, setShowAllVendors] = useState(false);
 
@@ -106,7 +108,7 @@ const VendorMarketplace = () => {
 
   const handleBookService = (vendorName: string) => {
     console.log(`Booking service with ${vendorName}`);
-    alert(`Booking request sent to ${vendorName}! They will contact you shortly.`);
+    navigate('/service-providers');
   };
 
   const handleContactVendor = (vendorName: string) => {
@@ -116,12 +118,12 @@ const VendorMarketplace = () => {
 
   const handleViewDetails = (vendorName: string) => {
     console.log(`Viewing details for ${vendorName}`);
-    alert(`Opening detailed profile for ${vendorName}...`);
+    navigate('/service-providers');
   };
 
   const handleViewAllVendors = () => {
     console.log('View all vendors clicked');
-    setShowAllVendors(!showAllVendors);
+    navigate('/service-providers');
   };
 
   return (
@@ -218,7 +220,7 @@ const VendorMarketplace = () => {
                     className={`flex-1 ${
                       vendor.available 
                         ? 'bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] hover:scale-105 text-white border-0 hover:text-white' 
-                        : 'bg-gray-500 text-gray-300 cursor-not-allowed'
+                        : 'bg-gray-500/50 text-gray-300 cursor-not-allowed'
                     } transition-all duration-300`}
                   >
                     {vendor.available ? 'Book Now' : 'Unavailable'}
@@ -246,18 +248,16 @@ const VendorMarketplace = () => {
         </div>
 
         {/* View All Button */}
-        {filteredVendors.length > 4 && (
-          <div className="text-center">
-            <Button
-              onClick={handleViewAllVendors}
-              variant="outline"
-              className="border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent px-8 py-3 rounded-xl transition-all duration-300"
-            >
-              {showAllVendors ? 'Show Less' : `View All ${filteredVendors.length} Vendors`}
-              <ChevronRight className={`w-4 h-4 ml-2 transition-transform ${showAllVendors ? 'rotate-90' : ''}`} />
-            </Button>
-          </div>
-        )}
+        <div className="text-center">
+          <Button
+            onClick={handleViewAllVendors}
+            variant="outline"
+            className="border-white/30 text-white hover:bg-white/10 hover:text-white bg-transparent px-8 py-3 rounded-xl transition-all duration-300"
+          >
+            View All Vendors
+            <ChevronRight className="w-4 h-4 ml-2" />
+          </Button>
+        </div>
       </div>
     </section>
   );
