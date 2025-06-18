@@ -94,16 +94,13 @@ const QRScanner: React.FC = () => {
         const validation = await validateVisitor(qrData);
         setScanResult(validation);
       } catch (error) {
+        console.error('QR Scanner Error:', error);
         setScanResult({
           status: 'declined',
           message: 'Invalid QR code format'
         });
       }
     }
-  };
-
-  const handleError = (err: any) => {
-    console.error('QR Scanner Error:', err);
   };
 
   const resetScanner = () => {
@@ -173,7 +170,6 @@ const QRScanner: React.FC = () => {
                 <QrReader
                   key={scanKey}
                   onResult={handleScan}
-                  onError={handleError}
                   constraints={{ facingMode: 'environment' }}
                   style={{ width: '100%' }}
                 />
