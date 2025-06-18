@@ -150,60 +150,60 @@ Provider Contact: ${selectedProvider.email}
       <div className="relative z-10">
         <Navigation />
         
-        <main className="pt-24 pb-12 px-6">
+        <main className="pt-24 pb-12 px-4 sm:px-6">
           <div className="max-w-7xl mx-auto">
             {/* Header */}
-            <div className="flex items-center justify-between mb-8">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+              <div className="flex items-start gap-4">
                 <Button
                   onClick={() => navigate('/')}
                   variant="outline"
                   size="icon"
-                  className="border-white/30 text-white hover:bg-white/10 bg-transparent"
+                  className="border-white/30 text-white hover:bg-white/10 bg-transparent flex-shrink-0"
                 >
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
-                <div>
-                  <h1 className="text-3xl font-bold text-white">Trusted Service Providers</h1>
-                  <p className="text-white/70">Connect with verified local professionals</p>
+                <div className="min-w-0">
+                  <h1 className="text-2xl sm:text-3xl font-bold text-white leading-tight">Trusted Service Providers</h1>
+                  <p className="text-white/70 text-sm sm:text-base">Connect with verified local professionals</p>
                 </div>
               </div>
-              <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+              <Badge className="bg-green-500/20 text-green-300 border-green-500/30 self-start sm:self-center">
                 Verified Network
               </Badge>
             </div>
 
             {/* Service Providers Grid */}
-            <div className="grid md:grid-cols-2 gap-8 mb-12">
+            <div className="grid gap-6 sm:gap-8 mb-12">
               {providers.map((provider) => (
                 <Card 
                   key={provider.id}
-                  className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl hover:scale-105 transition-all duration-300 hover:bg-white/15"
+                  className="p-4 sm:p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl hover:scale-[1.02] transition-all duration-300 hover:bg-white/15"
                 >
-                  <div className="space-y-6">
+                  <div className="space-y-4 sm:space-y-6">
                     {/* Provider Header */}
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-center space-x-4">
-                        <div className="w-16 h-16 rounded-xl bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] flex items-center justify-center shadow-lg">
-                          <span className="text-white font-bold text-lg">
+                    <div className="flex items-start justify-between gap-4">
+                      <div className="flex items-start gap-3 sm:gap-4 min-w-0 flex-1">
+                        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-xl bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] flex items-center justify-center shadow-lg flex-shrink-0">
+                          <span className="text-white font-bold text-sm sm:text-lg">
                             {provider.name.charAt(0)}
                           </span>
                         </div>
-                        <div>
-                          <h3 className="text-xl font-bold text-white mb-1">{provider.name}</h3>
-                          <div className="flex items-center space-x-2">
+                        <div className="min-w-0 flex-1">
+                          <h3 className="text-lg sm:text-xl font-bold text-white mb-1 leading-tight break-words">{provider.name}</h3>
+                          <div className="flex flex-wrap items-center gap-2 text-sm">
                             <div className="flex items-center">
                               <Star className="w-4 h-4 text-yellow-400 fill-current" />
                               <span className="text-white/80 ml-1">{provider.rating}</span>
                             </div>
                             <span className="text-white/60">({provider.reviews} reviews)</span>
-                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30">
+                            <Badge className="bg-blue-500/20 text-blue-300 border-blue-500/30 text-xs">
                               {provider.category}
                             </Badge>
                           </div>
                         </div>
                       </div>
-                      <div className={`w-3 h-3 rounded-full ${provider.available ? 'bg-green-400' : 'bg-red-400'}`} />
+                      <div className={`w-3 h-3 rounded-full flex-shrink-0 ${provider.available ? 'bg-green-400' : 'bg-red-400'}`} />
                     </div>
 
                     {/* Provider Details */}
@@ -212,7 +212,7 @@ Provider Contact: ${selectedProvider.email}
                       
                       {/* Services */}
                       <div>
-                        <h4 className="text-white font-medium mb-2">Services:</h4>
+                        <h4 className="text-white font-medium mb-2 text-sm sm:text-base">Services:</h4>
                         <div className="flex flex-wrap gap-2">
                           {provider.services.map((service, idx) => (
                             <Badge key={idx} variant="outline" className="border-white/30 text-white/80 text-xs">
@@ -223,39 +223,39 @@ Provider Contact: ${selectedProvider.email}
                       </div>
 
                       {/* Quick Info */}
-                      <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-sm">
                         <div className="flex items-center text-white/70">
-                          <Clock className="w-4 h-4 mr-2" />
-                          Response: {provider.response}
+                          <Clock className="w-4 h-4 mr-2 flex-shrink-0" />
+                          <span className="break-words">Response: {provider.response}</span>
                         </div>
                         <div className="flex items-center text-white/70">
-                          <MapPin className="w-4 h-4 mr-2" />
-                          {provider.experience} experience
+                          <MapPin className="w-4 h-4 mr-2 flex-shrink-0" />
+                          <span className="break-words">{provider.experience} experience</span>
                         </div>
-                        <div className="flex items-center text-white/70 col-span-2">
-                          <span className="font-medium text-white">Rates: {provider.price}</span>
+                        <div className="flex items-center text-white/70 sm:col-span-2">
+                          <span className="font-medium text-white break-words">Rates: {provider.price}</span>
                         </div>
                       </div>
 
                       {/* Certifications */}
                       <div>
-                        <h4 className="text-white font-medium mb-2">Certifications:</h4>
+                        <h4 className="text-white font-medium mb-2 text-sm sm:text-base">Certifications:</h4>
                         <div className="flex flex-wrap gap-2">
                           {provider.certifications.map((cert, idx) => (
-                            <div key={idx} className="flex items-center space-x-1">
-                              <CheckCircle className="w-3 h-3 text-green-400" />
-                              <span className="text-white/70 text-xs">{cert}</span>
+                            <div key={idx} className="flex items-center gap-1">
+                              <CheckCircle className="w-3 h-3 text-green-400 flex-shrink-0" />
+                              <span className="text-white/70 text-xs break-words">{cert}</span>
                             </div>
                           ))}
                         </div>
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex space-x-2 pt-4">
+                      <div className="flex flex-col sm:flex-row gap-2 sm:gap-2 pt-4">
                         <Button
                           onClick={() => handleBookService(provider)}
                           disabled={!provider.available}
-                          className={`flex-1 ${
+                          className={`flex-1 text-sm ${
                             provider.available 
                               ? 'bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] hover:scale-105 text-white border-0' 
                               : 'bg-gray-500/50 text-gray-300 cursor-not-allowed'
@@ -263,22 +263,24 @@ Provider Contact: ${selectedProvider.email}
                         >
                           {provider.available ? 'Book Service' : 'Unavailable'}
                         </Button>
-                        <Button
-                          onClick={() => handleCallProvider(provider)}
-                          variant="outline"
-                          size="icon"
-                          className="border-white/30 text-white hover:bg-white/10 bg-transparent"
-                        >
-                          <Phone className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          onClick={() => alert(`Contact: ${provider.email}\nPhone: ${provider.phone}`)}
-                          variant="outline"
-                          size="icon"
-                          className="border-white/30 text-white hover:bg-white/10 bg-transparent"
-                        >
-                          <Mail className="w-4 h-4" />
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button
+                            onClick={() => handleCallProvider(provider)}
+                            variant="outline"
+                            size="icon"
+                            className="border-white/30 text-white hover:bg-white/10 bg-transparent flex-shrink-0"
+                          >
+                            <Phone className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            onClick={() => alert(`Contact: ${provider.email}\nPhone: ${provider.phone}`)}
+                            variant="outline"
+                            size="icon"
+                            className="border-white/30 text-white hover:bg-white/10 bg-transparent flex-shrink-0"
+                          >
+                            <Mail className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -289,98 +291,98 @@ Provider Contact: ${selectedProvider.email}
             {/* Booking Modal */}
             {selectedProvider && (
               <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-                <Card className="w-full max-w-md p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                  <div className="flex items-center justify-between mb-6">
-                    <h3 className="text-xl font-bold text-white">Book Service</h3>
+                <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto p-4 sm:p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                  <div className="flex items-center justify-between mb-4 sm:mb-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-white">Book Service</h3>
                     <Button
                       variant="ghost"
                       size="icon"
                       onClick={() => setSelectedProvider(null)}
-                      className="text-white hover:bg-white/10"
+                      className="text-white hover:bg-white/10 flex-shrink-0"
                     >
                       ×
                     </Button>
                   </div>
 
-                  <div className="mb-4 p-4 rounded-lg bg-white/10">
-                    <h4 className="text-white font-medium">{selectedProvider.name}</h4>
-                    <p className="text-white/60 text-sm">{selectedProvider.category} • {selectedProvider.price}</p>
+                  <div className="mb-4 p-3 sm:p-4 rounded-lg bg-white/10">
+                    <h4 className="text-white font-medium text-sm sm:text-base break-words">{selectedProvider.name}</h4>
+                    <p className="text-white/60 text-xs sm:text-sm break-words">{selectedProvider.category} • {selectedProvider.price}</p>
                   </div>
 
                   <form onSubmit={handleBookingSubmit} className="space-y-4">
                     <div>
-                      <label className="block text-white/70 mb-2">Your Name</label>
+                      <label className="block text-white/70 mb-2 text-sm">Your Name</label>
                       <Input
                         value={bookingForm.residentName}
                         onChange={(e) => setBookingForm({...bookingForm, residentName: e.target.value})}
                         required
-                        className="bg-white/10 border-white/20 text-white placeholder-white/60"
+                        className="bg-white/10 border-white/20 text-white placeholder-white/60 text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-white/70 mb-2">Phone Number</label>
+                      <label className="block text-white/70 mb-2 text-sm">Phone Number</label>
                       <Input
                         value={bookingForm.phone}
                         onChange={(e) => setBookingForm({...bookingForm, phone: e.target.value})}
                         placeholder="Your contact number"
                         required
-                        className="bg-white/10 border-white/20 text-white placeholder-white/60"
+                        className="bg-white/10 border-white/20 text-white placeholder-white/60 text-sm"
                       />
                     </div>
 
                     <div>
-                      <label className="block text-white/70 mb-2">Service Type</label>
+                      <label className="block text-white/70 mb-2 text-sm">Service Type</label>
                       <select
                         value={bookingForm.serviceType}
                         onChange={(e) => setBookingForm({...bookingForm, serviceType: e.target.value})}
                         required
-                        className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white"
+                        className="w-full p-2 rounded-md bg-white/10 border border-white/20 text-white text-sm"
                       >
                         {selectedProvider.services.map((service: string, idx: number) => (
-                          <option key={idx} value={service} className="bg-gray-800">{service}</option>
+                          <option key={idx} value={service} className="bg-gray-800 text-white">{service}</option>
                         ))}
                       </select>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-white/70 mb-2">Preferred Date</label>
+                        <label className="block text-white/70 mb-2 text-sm">Preferred Date</label>
                         <Input
                           type="date"
                           value={bookingForm.preferredDate}
                           onChange={(e) => setBookingForm({...bookingForm, preferredDate: e.target.value})}
                           required
-                          className="bg-white/10 border-white/20 text-white"
+                          className="bg-white/10 border-white/20 text-white text-sm"
                         />
                       </div>
                       <div>
-                        <label className="block text-white/70 mb-2">Preferred Time</label>
+                        <label className="block text-white/70 mb-2 text-sm">Preferred Time</label>
                         <Input
                           type="time"
                           value={bookingForm.preferredTime}
                           onChange={(e) => setBookingForm({...bookingForm, preferredTime: e.target.value})}
                           required
-                          className="bg-white/10 border-white/20 text-white"
+                          className="bg-white/10 border-white/20 text-white text-sm"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-white/70 mb-2">Description</label>
+                      <label className="block text-white/70 mb-2 text-sm">Description</label>
                       <textarea
                         value={bookingForm.description}
                         onChange={(e) => setBookingForm({...bookingForm, description: e.target.value})}
                         placeholder="Describe the issue or service needed..."
                         required
                         rows={3}
-                        className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white placeholder-white/60 resize-none"
+                        className="w-full p-3 rounded-md bg-white/10 border border-white/20 text-white placeholder-white/60 resize-none text-sm"
                       />
                     </div>
 
                     <Button
                       type="submit"
-                      className="w-full bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:scale-105 transition-all duration-300"
+                      className="w-full bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:scale-105 transition-all duration-300 text-sm"
                     >
                       Confirm Booking
                     </Button>
