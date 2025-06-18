@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { QrReader } from 'react-qr-reader';
+import QrReader from 'react-qr-reader';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -85,12 +85,12 @@ const QRScanner: React.FC = () => {
     }
   };
 
-  const handleScan = async (result: any) => {
-    if (result?.text && isScanning) {
+  const handleScan = async (data: string | null) => {
+    if (data && isScanning) {
       setIsScanning(false);
       
       try {
-        const qrData = JSON.parse(result.text);
+        const qrData = JSON.parse(data);
         const validation = await validateVisitor(qrData);
         setScanResult(validation);
       } catch (error) {
@@ -172,10 +172,10 @@ const QRScanner: React.FC = () => {
               <div className="bg-white rounded-2xl p-4">
                 <QrReader
                   key={scanKey}
-                  onResult={handleScan}
+                  delay={300}
+                  onScan={handleScan}
                   onError={handleError}
                   style={{ width: '100%' }}
-                  constraints={{ facingMode: 'environment' }}
                 />
               </div>
               <div className="text-center">
