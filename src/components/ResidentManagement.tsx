@@ -83,7 +83,8 @@ const ResidentManagement = () => {
         email: data.email,
         unit_number: data.unit_number,
         phone: data.phone,
-        status: 'active'
+        status: 'active',
+        resident_number: '' // This will trigger the database function to generate a unique number
       });
 
     if (error) {
@@ -254,6 +255,82 @@ const ResidentManagement = () => {
                   Add Resident
                 </Button>
                 <Button type="button" variant="outline" onClick={() => setIsAddingResident(false)} className="border-white/30 text-white hover:bg-white/10">
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </Card>
+      )}
+
+      {/* Edit Resident Form */}
+      {editingResident && (
+        <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+          <h4 className="text-lg font-bold text-white mb-4">Edit Resident</h4>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleUpdateResident)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormItem>
+                  <FormLabel className="text-white">Name</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...form.register('name', { required: true })} 
+                      defaultValue={editingResident.name}
+                      className="bg-white/10 border-white/20 text-white" 
+                    />
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel className="text-white">Email</FormLabel>
+                  <FormControl>
+                    <Input 
+                      type="email" 
+                      {...form.register('email', { required: true })} 
+                      defaultValue={editingResident.email}
+                      className="bg-white/10 border-white/20 text-white" 
+                    />
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel className="text-white">Unit Number</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...form.register('unit_number', { required: true })} 
+                      defaultValue={editingResident.unit_number}
+                      className="bg-white/10 border-white/20 text-white" 
+                    />
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel className="text-white">Phone</FormLabel>
+                  <FormControl>
+                    <Input 
+                      {...form.register('phone')} 
+                      defaultValue={editingResident.phone}
+                      className="bg-white/10 border-white/20 text-white" 
+                    />
+                  </FormControl>
+                </FormItem>
+                <FormItem>
+                  <FormLabel className="text-white">Status</FormLabel>
+                  <FormControl>
+                    <Select defaultValue={editingResident.status} onValueChange={(value) => form.setValue('status', value)}>
+                      <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="active">Active</SelectItem>
+                        <SelectItem value="inactive">Inactive</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </FormControl>
+                </FormItem>
+              </div>
+              <div className="flex gap-2">
+                <Button type="submit" className="bg-gradient-to-r from-[#10b981] to-[#059669] text-white">
+                  Update Resident
+                </Button>
+                <Button type="button" variant="outline" onClick={() => setEditingResident(null)} className="border-white/30 text-white hover:bg-white/10">
                   Cancel
                 </Button>
               </div>
