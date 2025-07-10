@@ -166,12 +166,11 @@ const QRScanner: React.FC = () => {
 
           {isScanning && (
             <div className="space-y-4">
-              <div className="bg-white rounded-2xl p-4">
+              <div className="bg-white rounded-2xl p-4" style={{ width: '100%' }}>
                 <QrReader
                   key={scanKey}
                   onResult={handleScan}
                   constraints={{ facingMode: 'environment' }}
-                  style={{ width: '100%' }}
                 />
               </div>
               <div className="text-center">

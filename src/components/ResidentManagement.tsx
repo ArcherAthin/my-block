@@ -78,13 +78,13 @@ const ResidentManagement = () => {
   const handleAddResident = async (data: any) => {
     const { error } = await supabase
       .from('residents')
-      .insert([{
+      .insert({
         name: data.name,
         email: data.email,
         unit_number: data.unit_number,
         phone: data.phone,
         status: 'active'
-      }]);
+      });
 
     if (error) {
       toast({
