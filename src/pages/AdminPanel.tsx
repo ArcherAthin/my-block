@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -7,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { useNavigate } from "react-router-dom";
 import Navigation from '@/components/Navigation';
 import FloatingBackground from '@/components/FloatingBackground';
+import ResidentManagement from '@/components/ResidentManagement';
 import { 
   Shield, 
   DollarSign, 
@@ -29,6 +29,7 @@ const AdminPanel = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [activeTab, setActiveTab] = useState('dashboard');
+
   const [fundData, setFundData] = useState({
     totalFunds: 450000,
     monthlyIncome: 125000,
@@ -89,10 +90,10 @@ const AdminPanel = () => {
 
   const tabs = [
     { id: 'dashboard', label: 'Dashboard', icon: BarChart3 },
+    { id: 'residents', label: 'Residents & Bills', icon: Users },
     { id: 'funds', label: 'Fund Management', icon: DollarSign },
     { id: 'polls', label: 'Polls', icon: Vote },
-    { id: 'complaints', label: 'Complaints', icon: AlertCircle },
-    { id: 'residents', label: 'Residents', icon: Users }
+    { id: 'complaints', label: 'Complaints', icon: AlertCircle }
   ];
 
   if (!isAuthenticated) {
@@ -235,10 +236,10 @@ const AdminPanel = () => {
                 <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white/70 text-sm">Active Issues</p>
-                      <p className="text-2xl font-bold text-white">23</p>
+                      <p className="text-white/70 text-sm">Pending Bills</p>
+                      <p className="text-2xl font-bold text-white">156</p>
                     </div>
-                    <AlertCircle className="w-8 h-8 text-yellow-400" />
+                    <DollarSign className="w-8 h-8 text-yellow-400" />
                   </div>
                 </Card>
                 
@@ -255,7 +256,7 @@ const AdminPanel = () => {
                 <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-white/70 text-sm">Satisfaction Rate</p>
+                      <p className="text-white/70 text-sm">Payment Success Rate</p>
                       <p className="text-2xl font-bold text-white">94%</p>
                     </div>
                     <BarChart3 className="w-8 h-8 text-purple-400" />
@@ -263,6 +264,8 @@ const AdminPanel = () => {
                 </Card>
               </div>
             )}
+
+            {activeTab === 'residents' && <ResidentManagement />}
 
             {activeTab === 'funds' && (
               <div className="grid lg:grid-cols-2 gap-8">
@@ -420,35 +423,6 @@ const AdminPanel = () => {
                   </Card>
                 ))}
               </div>
-            )}
-
-            {activeTab === 'residents' && (
-              <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                <h3 className="text-xl font-bold text-white mb-6">Resident Directory</h3>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[
-                      { name: 'John Doe', unit: 'A-101', phone: '+91 98765 43210', status: 'Active' },
-                      { name: 'Sarah Wilson', unit: 'B-205', phone: '+91 98765 43211', status: 'Active' },
-                      { name: 'Mike Johnson', unit: 'C-303', phone: '+91 98765 43212', status: 'Pending' },
-                      { name: 'Emily Davis', unit: 'A-402', phone: '+91 98765 43213', status: 'Active' },
-                      { name: 'David Chen', unit: 'B-501', phone: '+91 98765 43214', status: 'Active' },
-                      { name: 'Lisa Kumar', unit: 'C-604', phone: '+91 98765 43215', status: 'Active' }
-                    ].map((resident, index) => (
-                      <div key={index} className="p-4 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-white font-medium">{resident.name}</h4>
-                          <Badge className={resident.status === 'Active' ? 'bg-green-500/20 text-green-300' : 'bg-yellow-500/20 text-yellow-300'}>
-                            {resident.status}
-                          </Badge>
-                        </div>
-                        <p className="text-white/60 text-sm">Unit: {resident.unit}</p>
-                        <p className="text-white/60 text-sm">{resident.phone}</p>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </Card>
             )}
           </div>
         </main>

@@ -1,13 +1,13 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/Navigation';
 import FloatingBackground from '@/components/FloatingBackground';
+import BillPayment from '@/components/BillPayment';
+import { supabase } from "@/integrations/supabase/client";
 import { 
   CreditCard, 
   Calendar, 
@@ -19,18 +19,18 @@ import {
   DollarSign,
   Clock,
   Star,
-  ArrowLeft
+  ArrowLeft,
+  RefreshCw
 } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast";
 
 const ResidentDashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
-  const [outstandingDues, setOutstandingDues] = useState(2450);
-  const [recentPayments] = useState([
-    { id: 1, amount: 1200, date: '2024-01-15', type: 'Maintenance Fee', status: 'Paid' },
-    { id: 2, amount: 800, date: '2024-01-10', type: 'Electricity Bill', status: 'Paid' },
-    { id: 3, amount: 450, date: '2024-01-05', type: 'Water Bill', status: 'Paid' }
-  ]);
+  const { toast } = useToast();
+  const [bills, setBills] = useState([]);
+  const [resident, setResident] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const [upcomingEvents] = useState([
     { id: 1, title: 'Community Meeting', date: '2024-02-15', time: '7:00 PM', rsvp: false },
@@ -44,14 +44,73 @@ const ResidentDashboard = () => {
     { id: 3, title: 'Facility Booking Update', content: 'New time slots available for community hall bookings.', date: '2024-01-15' }
   ]);
 
-  const handlePayment = () => {
-    // Simulate payment processing
-    alert('Payment gateway integration would go here. For demo: Payment of ₹' + outstandingDues + ' processed successfully!');
-    setOutstandingDues(0);
+  useEffect(() => {
+    if (user) {
+      fetchResidentData();
+    }
+  }, [user]);
+
+  const fetchResidentData = async () => {
+    if (!user?.email) return;
+
+    setLoading(true);
+    try {
+      // Fetch resident profile
+      const { data: residentData, error: residentError } = await supabase
+        .from('residents')
+        .select('*')
+        .eq('email', user.email)
+        .single();
+
+      if (residentError && residentError.code !== 'PGRST116') {
+        console.error('Error fetching resident:', residentError);
+        return;
+      }
+
+      if (residentData) {
+        setResident(residentData);
+        
+        // Fetch bills for this resident
+        const { data: billsData, error: billsError } = await supabase
+          .from('bills')
+          .select(`
+            *,
+            bill_categories(name, description)
+          `)
+          .eq('resident_id', residentData.id)
+          .order('due_date', { ascending: true });
+
+        if (billsError) {
+          console.error('Error fetching bills:', billsError);
+        } else {
+          setBills(billsData || []);
+        }
+      } else {
+        // User doesn't have a resident profile yet
+        toast({
+          title: "Profile Setup Required",
+          description: "Please contact the admin to set up your resident profile.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching resident data:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleRSVP = (eventId: number) => {
-    alert(`RSVP confirmed for event ${eventId}!`);
+  const handlePaymentSuccess = () => {
+    // Refresh bills after payment
+    setTimeout(() => {
+      fetchResidentData();
+    }, 2000);
+  };
+
+  const getTotalOutstanding = () => {
+    return bills
+      .filter(bill => bill.status === 'pending')
+      .reduce((total, bill) => total + parseFloat(bill.amount), 0);
   };
 
   const quickActions = [
@@ -60,6 +119,20 @@ const ResidentDashboard = () => {
     { title: 'Book Facility', icon: Building, action: () => navigate('/facility-booking') },
     { title: 'Service Providers', icon: Users, action: () => navigate('/service-providers') }
   ];
+
+  if (loading) {
+    return (
+      <div className="min-h-screen relative overflow-hidden">
+        <FloatingBackground />
+        <div className="relative z-10 flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="w-8 h-8 border-4 border-white/30 border-t-white rounded-full animate-spin mx-auto mb-4" />
+            <p className="text-white">Loading your dashboard...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -82,59 +155,51 @@ const ResidentDashboard = () => {
                   <ArrowLeft className="w-4 h-4" />
                 </Button>
                 <div>
-                  <h1 className="text-3xl font-bold text-white">Welcome back, {user?.name || 'Resident'}!</h1>
-                  <p className="text-white/70">Your personal community dashboard</p>
+                  <h1 className="text-3xl font-bold text-white">
+                    Welcome back, {resident?.name || user?.name || 'Resident'}!
+                  </h1>
+                  <p className="text-white/70">
+                    {resident ? `Unit ${resident.unit_number} • ID: ${resident.resident_number}` : 'Your personal community dashboard'}
+                  </p>
                 </div>
               </div>
-              <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                Active Resident
-              </Badge>
+              <div className="flex items-center space-x-4">
+                <Button
+                  onClick={fetchResidentData}
+                  variant="outline"
+                  size="icon"
+                  className="border-white/30 text-white hover:bg-white/10 bg-transparent"
+                >
+                  <RefreshCw className="w-4 h-4" />
+                </Button>
+                <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
+                  Active Resident
+                </Badge>
+              </div>
             </div>
 
             <div className="grid lg:grid-cols-3 gap-8">
-              {/* Left Column - Dues & Payments */}
+              {/* Left Column - Bills & Payments */}
               <div className="space-y-6">
                 {/* Outstanding Dues */}
                 <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
                   <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-white">Outstanding Dues</h3>
+                    <h3 className="text-lg font-bold text-white">Outstanding Bills</h3>
                     <CreditCard className="w-5 h-5 text-white/60" />
                   </div>
                   <div className="space-y-4">
-                    <div className="text-3xl font-bold text-white">₹{outstandingDues.toLocaleString()}</div>
-                    {outstandingDues > 0 ? (
-                      <Button 
-                        onClick={handlePayment}
-                        className="w-full bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:scale-105 transition-all duration-300"
-                      >
-                        Pay Now
-                      </Button>
-                    ) : (
+                    <div className="text-3xl font-bold text-white">
+                      ${getTotalOutstanding().toFixed(2)}
+                    </div>
+                    {getTotalOutstanding() === 0 ? (
                       <Badge className="bg-green-500/20 text-green-300 border-green-500/30">
-                        All dues cleared!
+                        All bills paid!
                       </Badge>
+                    ) : (
+                      <p className="text-white/70 text-sm">
+                        {bills.filter(bill => bill.status === 'pending').length} pending bills
+                      </p>
                     )}
-                  </div>
-                </Card>
-
-                {/* Recent Payments */}
-                <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                  <h3 className="text-lg font-bold text-white mb-4">Recent Payments</h3>
-                  <div className="space-y-3">
-                    {recentPayments.map((payment) => (
-                      <div key={payment.id} className="flex justify-between items-center p-3 rounded-lg bg-white/10">
-                        <div>
-                          <div className="text-white font-medium">{payment.type}</div>
-                          <div className="text-white/60 text-sm">{payment.date}</div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-white font-bold">₹{payment.amount}</div>
-                          <Badge className="bg-green-500/20 text-green-300 text-xs">
-                            {payment.status}
-                          </Badge>
-                        </div>
-                      </div>
-                    ))}
                   </div>
                 </Card>
 
@@ -160,58 +225,22 @@ const ResidentDashboard = () => {
                 </Card>
               </div>
 
-              {/* Middle Column - Events & Calendar */}
-              <div className="space-y-6">
-                {/* Upcoming Events */}
-                <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-white">Upcoming Events</h3>
-                    <Calendar className="w-5 h-5 text-white/60" />
-                  </div>
-                  <div className="space-y-4">
-                    {upcomingEvents.map((event) => (
-                      <div key={event.id} className="p-4 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
-                        <div className="flex justify-between items-start mb-2">
-                          <h4 className="text-white font-medium">{event.title}</h4>
-                          <Badge className={event.rsvp ? "bg-green-500/20 text-green-300" : "bg-yellow-500/20 text-yellow-300"}>
-                            {event.rsvp ? "RSVP'd" : "Pending"}
-                          </Badge>
-                        </div>
-                        <div className="text-white/60 text-sm mb-3">
-                          {event.date} at {event.time}
-                        </div>
-                        {!event.rsvp && (
-                          <Button
-                            onClick={() => handleRSVP(event.id)}
-                            size="sm"
-                            className="bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] text-white hover:scale-105 transition-all duration-300"
-                          >
-                            RSVP Now
-                          </Button>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </Card>
-              </div>
-
-              {/* Right Column - Announcements */}
-              <div className="space-y-6">
-                <Card className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="text-lg font-bold text-white">Announcements</h3>
-                    <Bell className="w-5 h-5 text-white/60" />
-                  </div>
-                  <div className="space-y-4">
-                    {announcements.map((announcement) => (
-                      <div key={announcement.id} className="p-4 rounded-lg bg-white/10 hover:bg-white/20 transition-colors">
-                        <h4 className="text-white font-medium mb-2">{announcement.title}</h4>
-                        <p className="text-white/70 text-sm mb-2">{announcement.content}</p>
-                        <div className="text-white/50 text-xs">{announcement.date}</div>
-                      </div>
-                    ))}
-                  </div>
-                </Card>
+              {/* Middle Column - Bills */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-xl font-bold text-white">Your Bills</h3>
+                  <Button
+                    onClick={fetchResidentData}
+                    variant="outline"
+                    size="sm"
+                    className="border-white/30 text-white hover:bg-white/10 bg-transparent"
+                  >
+                    <RefreshCw className="w-4 h-4 mr-2" />
+                    Refresh
+                  </Button>
+                </div>
+                
+                <BillPayment bills={bills} onPaymentSuccess={handlePaymentSuccess} />
               </div>
             </div>
           </div>
