@@ -30,31 +30,40 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
         timestamp: new Date().toISOString()
       });
 
+      console.log('Generating QR for data:', qrData);
+
       // Create a data URL with the QR data
       const dataUrl = `data:text/plain;base64,${btoa(qrData)}`;
       
       // Use Dub.co API to generate QR code
-      const response = await fetch(`https://api.dub.co/qr?url=${encodeURIComponent(dataUrl)}&size=300`);
+      const apiUrl = `https://api.dub.co/qr?url=${encodeURIComponent(dataUrl)}&size=300`;
+      console.log('API URL:', apiUrl);
+      
+      const response = await fetch(apiUrl);
       
       if (!response.ok) {
-        throw new Error('Failed to generate QR code from Dub.co API');
+        throw new Error(`Failed to generate QR code: ${response.status} ${response.statusText}`);
       }
 
       // Get the QR code as blob and convert to data URL
       const blob = await response.blob();
-      const qrCodeURL = URL.createObjectURL(blob);
       
-      // Convert blob to data URL for download functionality
+      // Convert blob to data URL for display and download
       const reader = new FileReader();
       reader.onload = () => {
-        setQrCodeDataURL(reader.result as string);
+        const result = reader.result as string;
+        setQrCodeDataURL(result);
+        console.log('QR code generated successfully');
+      };
+      reader.onerror = () => {
+        console.error('Error reading QR code blob');
+        throw new Error('Failed to process QR code image');
       };
       reader.readAsDataURL(blob);
 
     } catch (error) {
       console.error('Error generating QR code:', error);
-      // Fallback message
-      alert('Failed to generate QR code. Please try again.');
+      alert(`Failed to generate QR code: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsGenerating(false);
     }
@@ -65,7 +74,9 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
       const link = document.createElement('a');
       link.href = qrCodeDataURL;
       link.download = `visitor-qr-${visitorData.id}.png`;
+      document.body.appendChild(link);
       link.click();
+      document.body.removeChild(link);
     }
   };
 
@@ -99,6 +110,10 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
                     src={qrCodeDataURL} 
                     alt="Visitor QR Code"
                     className="w-64 h-64 object-contain"
+                    onError={(e) => {
+                      console.error('Error loading QR code image:', e);
+                      alert('Failed to display QR code image');
+                    }}
                   />
                 </div>
               </div>
