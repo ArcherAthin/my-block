@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect } from 'react';
-import { QrReader } from 'react-qr-reader';
+import React, { useState, useEffect, useRef } from 'react';
+import QrScanner from 'qr-scanner';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -28,7 +28,8 @@ interface ScanResult {
 const QRScanner: React.FC = () => {
   const [scanResult, setScanResult] = useState<ScanResult | null>(null);
   const [isScanning, setIsScanning] = useState(false);
-  const [scanKey, setScanKey] = useState(0);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const qrScannerRef = useRef<QrScanner | null>(null);
 
   const validateVisitor = async (qrData: any): Promise<ScanResult> => {
     try {
@@ -85,12 +86,12 @@ const QRScanner: React.FC = () => {
     }
   };
 
-  const handleScan = async (result: any) => {
+  const handleScanResult = async (result: string) => {
     if (result && isScanning) {
       setIsScanning(false);
       
       try {
-        const qrData = JSON.parse(result.text);
+        const qrData = JSON.parse(result);
         const validation = await validateVisitor(qrData);
         setScanResult(validation);
       } catch (error) {
@@ -103,11 +104,49 @@ const QRScanner: React.FC = () => {
     }
   };
 
+  const startScanning = async () => {
+    if (videoRef.current && !qrScannerRef.current) {
+      try {
+        qrScannerRef.current = new QrScanner(
+          videoRef.current,
+          (result) => handleScanResult(result.data),
+          {
+            highlightScanRegion: true,
+            highlightCodeOutline: true,
+          }
+        );
+        
+        await qrScannerRef.current.start();
+        setIsScanning(true);
+      } catch (error) {
+        console.error('Error starting QR scanner:', error);
+        alert('Failed to start camera. Please check camera permissions.');
+      }
+    }
+  };
+
+  const stopScanning = () => {
+    if (qrScannerRef.current) {
+      qrScannerRef.current.stop();
+      qrScannerRef.current.destroy();
+      qrScannerRef.current = null;
+    }
+    setIsScanning(false);
+  };
+
   const resetScanner = () => {
     setScanResult(null);
-    setIsScanning(true);
-    setScanKey(prev => prev + 1);
+    stopScanning();
   };
+
+  useEffect(() => {
+    return () => {
+      if (qrScannerRef.current) {
+        qrScannerRef.current.stop();
+        qrScannerRef.current.destroy();
+      }
+    };
+  }, []);
 
   const getStatusBadge = () => {
     if (!scanResult) return null;
@@ -155,7 +194,7 @@ const QRScanner: React.FC = () => {
           {!isScanning && !scanResult && (
             <div className="text-center">
               <Button
-                onClick={() => setIsScanning(true)}
+                onClick={startScanning}
                 className="bg-gradient-to-r from-[#ff6ec4] to-[#7873f5] text-white hover:scale-105 transition-all duration-300"
               >
                 <Scan className="w-4 h-4 mr-2" />
@@ -166,16 +205,16 @@ const QRScanner: React.FC = () => {
 
           {isScanning && (
             <div className="space-y-4">
-              <div className="bg-white rounded-2xl p-4" style={{ width: '100%' }}>
-                <QrReader
-                  key={scanKey}
-                  onResult={handleScan}
-                  constraints={{ facingMode: 'environment' }}
+              <div className="bg-white rounded-2xl p-4 relative">
+                <video 
+                  ref={videoRef}
+                  className="w-full h-64 object-cover rounded-lg"
+                  style={{ transform: 'scaleX(-1)' }}
                 />
               </div>
               <div className="text-center">
                 <Button
-                  onClick={() => setIsScanning(false)}
+                  onClick={stopScanning}
                   variant="outline"
                   className="border-white/30 text-white hover:bg-white/10 bg-transparent"
                 >
