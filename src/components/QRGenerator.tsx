@@ -1,6 +1,5 @@
 
 import React, { useState, useEffect } from 'react';
-import QRCode from 'qrcode';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -31,18 +30,31 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
         timestamp: new Date().toISOString()
       });
 
-      const qrCodeURL = await QRCode.toDataURL(qrData, {
-        width: 300,
-        margin: 2,
-        color: {
-          dark: '#000000',
-          light: '#FFFFFF'
-        }
-      });
+      // Create a data URL with the QR data
+      const dataUrl = `data:text/plain;base64,${btoa(qrData)}`;
+      
+      // Use Dub.co API to generate QR code
+      const response = await fetch(`https://api.dub.co/qr?url=${encodeURIComponent(dataUrl)}&size=300`);
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate QR code from Dub.co API');
+      }
 
-      setQrCodeDataURL(qrCodeURL);
+      // Get the QR code as blob and convert to data URL
+      const blob = await response.blob();
+      const qrCodeURL = URL.createObjectURL(blob);
+      
+      // Convert blob to data URL for download functionality
+      const reader = new FileReader();
+      reader.onload = () => {
+        setQrCodeDataURL(reader.result as string);
+      };
+      reader.readAsDataURL(blob);
+
     } catch (error) {
       console.error('Error generating QR code:', error);
+      // Fallback message
+      alert('Failed to generate QR code. Please try again.');
     } finally {
       setIsGenerating(false);
     }
