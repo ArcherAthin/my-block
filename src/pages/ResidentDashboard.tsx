@@ -3,11 +3,15 @@ import { useState, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/Navigation';
 import FloatingBackground from '@/components/FloatingBackground';
 import BillPayment from '@/components/BillPayment';
+import ComplaintForm from '@/components/ComplaintForm';
+import FacilityBookingForm from '@/components/FacilityBookingForm';
+import ServiceBookingForm from '@/components/ServiceBookingForm';
 import { supabase } from "@/integrations/supabase/client";
 import { 
   CreditCard, 
@@ -69,10 +73,59 @@ const ResidentDashboard = () => {
   useEffect(() => {
     if (user) {
       fetchResidentData();
+      setupRealtimeSubscription();
     } else {
       setLoading(false);
     }
   }, [user]);
+
+  const setupRealtimeSubscription = () => {
+    // Subscribe to bills changes for real-time updates
+    const billsChannel = supabase
+      .channel('resident_bills_realtime')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'bills'
+      }, (payload) => {
+        console.log('Bills change detected:', payload);
+        // Refresh bills data when changes occur
+        fetchBillsData();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(billsChannel);
+    };
+  };
+
+  const fetchBillsData = async () => {
+    if (!resident?.id) return;
+
+    try {
+      const { data: billsData, error: billsError } = await supabase
+        .from('bills')
+        .select(`
+          *,
+          bill_categories(name, description)
+        `)
+        .eq('resident_id', resident.id)
+        .order('due_date', { ascending: true });
+
+      if (billsError) {
+        console.error('Error fetching bills:', billsError);
+        setBills(mockBills);
+      } else {
+        setBills(billsData || []);
+        toast({
+          title: "Bills Updated",
+          description: "Your bills have been updated with the latest information.",
+        });
+      }
+    } catch (error) {
+      console.error('Error fetching bills:', error);
+    }
+  };
 
   const fetchResidentData = async () => {
     if (!user?.email) {
@@ -305,22 +358,68 @@ const ResidentDashboard = () => {
                 </Card>
               </div>
 
-              {/* Middle Column - Bills */}
+              {/* Middle & Right Column - Tabbed Content */}
               <div className="lg:col-span-2 space-y-6">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-xl font-bold text-white">Your Bills</h3>
-                  <Button
-                    onClick={fetchResidentData}
-                    variant="outline"
-                    size="sm"
-                    className="border-white/30 text-white hover:bg-white/10 bg-transparent"
-                  >
-                    <RefreshCw className="w-4 h-4 mr-2" />
-                    Refresh
-                  </Button>
-                </div>
-                
-                <BillPayment bills={bills} onPaymentSuccess={handlePaymentSuccess} />
+                <Tabs defaultValue="bills" className="space-y-6">
+                  <TabsList className="grid w-full grid-cols-4 bg-white/10 border border-white/20">
+                    <TabsTrigger value="bills" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6ec4] data-[state=active]:to-[#7873f5] data-[state=active]:text-white text-white/70">Bills</TabsTrigger>
+                    <TabsTrigger value="complaints" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6ec4] data-[state=active]:to-[#7873f5] data-[state=active]:text-white text-white/70">Complaints</TabsTrigger>
+                    <TabsTrigger value="facility" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6ec4] data-[state=active]:to-[#7873f5] data-[state=active]:text-white text-white/70">Facilities</TabsTrigger>
+                    <TabsTrigger value="services" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-[#ff6ec4] data-[state=active]:to-[#7873f5] data-[state=active]:text-white text-white/70">Services</TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="bills" className="space-y-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-xl font-bold text-white">Your Bills</h3>
+                      <Button
+                        onClick={fetchResidentData}
+                        variant="outline"
+                        size="sm"
+                        className="border-white/30 text-white hover:bg-white/10 bg-transparent"
+                      >
+                        <RefreshCw className="w-4 h-4 mr-2" />
+                        Refresh
+                      </Button>
+                    </div>
+                    <BillPayment bills={bills} onPaymentSuccess={handlePaymentSuccess} />
+                  </TabsContent>
+
+                  <TabsContent value="complaints">
+                    <ComplaintForm 
+                      residentId={resident?.id} 
+                      onComplaintSubmitted={() => {
+                        toast({
+                          title: "Complaint Submitted",
+                          description: "Your complaint will be reviewed by the admin immediately.",
+                        });
+                      }}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="facility">
+                    <FacilityBookingForm 
+                      residentId={resident?.id} 
+                      onBookingSubmitted={() => {
+                        toast({
+                          title: "Booking Submitted", 
+                          description: "Your facility booking will be reviewed by the admin immediately.",
+                        });
+                      }}
+                    />
+                  </TabsContent>
+
+                  <TabsContent value="services">
+                    <ServiceBookingForm 
+                      residentId={resident?.id} 
+                      onBookingSubmitted={() => {
+                        toast({
+                          title: "Service Requested",
+                          description: "Your service booking will be reviewed by the admin immediately.",
+                        });
+                      }}
+                    />
+                  </TabsContent>
+                </Tabs>
               </div>
             </div>
           </div>

@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import Navigation from '@/components/Navigation';
 import FloatingBackground from '@/components/FloatingBackground';
 import ResidentManagement from '@/components/ResidentManagement';
+import { supabase } from "@/integrations/supabase/client";
 import { 
   Shield, 
   DollarSign, 
@@ -43,11 +44,9 @@ const AdminPanel = () => {
     { id: 3, title: 'Parking Fee Increase', status: 'Draft', votes: 0, endDate: '2024-02-25', options: ['Agree', 'Disagree'], results: [0, 0] }
   ]);
 
-  const [complaints, setComplaints] = useState([
-    { id: 1, resident: 'John Doe', subject: 'Noise Complaint', status: 'In Review', priority: 'Medium', date: '2024-01-20', description: 'Late night music from apartment 4B' },
-    { id: 2, resident: 'Sarah Wilson', subject: 'Parking Issue', status: 'Resolved', priority: 'Low', date: '2024-01-18', description: 'Car parked in wrong spot' },
-    { id: 3, resident: 'Mike Johnson', subject: 'Security Concern', status: 'Open', priority: 'High', date: '2024-01-19', description: 'Unauthorized person in building' }
-  ]);
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [facilityBookings, setFacilityBookings] = useState<any[]>([]);
+  const [serviceBookings, setServiceBookings] = useState<any[]>([]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,11 +80,128 @@ const AdminPanel = () => {
     }
   };
 
-  const updateComplaintStatus = (complaintId: number, newStatus: string) => {
-    setComplaints(complaints.map(complaint => 
-      complaint.id === complaintId ? { ...complaint, status: newStatus } : complaint
-    ));
-    alert(`Complaint #${complaintId} status updated to: ${newStatus}`);
+  const updateComplaintStatus = async (complaintId: string, newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from('complaints')
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', complaintId);
+
+      if (error) throw error;
+      alert(`Complaint status updated to: ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating complaint:', error);
+      alert('Failed to update complaint status');
+    }
+  };
+
+  const updateBookingStatus = async (bookingId: string, tableName: 'facility_bookings' | 'service_bookings', newStatus: string) => {
+    try {
+      const { error } = await supabase
+        .from(tableName)
+        .update({ status: newStatus, updated_at: new Date().toISOString() })
+        .eq('id', bookingId);
+
+      if (error) throw error;
+      alert(`Booking status updated to: ${newStatus}`);
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      alert('Failed to update booking status');
+    }
+  };
+
+  // Real-time subscriptions
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    // Subscribe to complaints
+    const complaintsChannel = supabase
+      .channel('admin_complaints')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'complaints' }, (payload) => {
+        console.log('Complaints change:', payload);
+        fetchComplaints();
+      })
+      .subscribe();
+
+    // Subscribe to facility bookings  
+    const facilityChannel = supabase
+      .channel('admin_facility_bookings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'facility_bookings' }, (payload) => {
+        console.log('Facility bookings change:', payload);
+        fetchFacilityBookings();
+      })
+      .subscribe();
+
+    // Subscribe to service bookings
+    const serviceChannel = supabase
+      .channel('admin_service_bookings')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'service_bookings' }, (payload) => {
+        console.log('Service bookings change:', payload);
+        fetchServiceBookings();
+      })
+      .subscribe();
+
+    // Initial data fetch
+    fetchComplaints();
+    fetchFacilityBookings();
+    fetchServiceBookings();
+
+    return () => {
+      supabase.removeChannel(complaintsChannel);
+      supabase.removeChannel(facilityChannel);
+      supabase.removeChannel(serviceChannel);
+    };
+  }, [isAuthenticated]);
+
+  const fetchComplaints = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('complaints')
+        .select(`
+          *,
+          residents(name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setComplaints(data || []);
+    } catch (error) {
+      console.error('Error fetching complaints:', error);
+    }
+  };
+
+  const fetchFacilityBookings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('facility_bookings')
+        .select(`
+          *,
+          residents(name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setFacilityBookings(data || []);
+    } catch (error) {
+      console.error('Error fetching facility bookings:', error);
+    }
+  };
+
+  const fetchServiceBookings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('service_bookings')
+        .select(`
+          *,
+          residents(name)
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setServiceBookings(data || []);
+    } catch (error) {
+      console.error('Error fetching service bookings:', error);
+    }
   };
 
   const tabs = [
@@ -93,7 +209,9 @@ const AdminPanel = () => {
     { id: 'residents', label: 'Residents & Bills', icon: Users },
     { id: 'funds', label: 'Fund Management', icon: DollarSign },
     { id: 'polls', label: 'Polls', icon: Vote },
-    { id: 'complaints', label: 'Complaints', icon: AlertCircle }
+    { id: 'complaints', label: 'Complaints', icon: AlertCircle },
+    { id: 'facility-bookings', label: 'Facility Bookings', icon: Calendar },
+    { id: 'service-bookings', label: 'Service Bookings', icon: Settings }
   ];
 
   if (!isAuthenticated) {
@@ -418,6 +536,118 @@ const AdminPanel = () => {
                         >
                           Resolve
                         </Button>
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'facility-bookings' && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-white">Facility Bookings</h3>
+                
+                {facilityBookings.map((booking) => (
+                  <Card key={booking.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h4 className="text-white font-bold">{booking.facility_name}</h4>
+                          <Badge className={`${
+                            booking.status === 'Approved' ? 'bg-green-500/20 text-green-300' :
+                            booking.status === 'Pending' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-red-500/20 text-red-300'
+                          }`}>
+                            {booking.status}
+                          </Badge>
+                        </div>
+                        <p className="text-white/60">{booking.residents?.name} • {booking.booking_date}</p>
+                        <p className="text-white/70 mt-2">{booking.start_time} - {booking.end_time}</p>
+                        {booking.notes && <p className="text-white/60 text-sm mt-1">{booking.notes}</p>}
+                      </div>
+                      <div className="flex space-x-2">
+                        {booking.status === 'Pending' && (
+                          <>
+                            <Button
+                              onClick={() => updateBookingStatus(booking.id, 'facility_bookings', 'Approved')}
+                              size="sm"
+                              variant="outline"
+                              className="border-green-500/30 text-green-300 hover:bg-green-500/10"
+                            >
+                              Approve
+                            </Button>
+                            <Button
+                              onClick={() => updateBookingStatus(booking.id, 'facility_bookings', 'Rejected')}
+                              size="sm"
+                              variant="outline"
+                              className="border-red-500/30 text-red-300 hover:bg-red-500/10"
+                            >
+                              Reject
+                            </Button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </Card>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'service-bookings' && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-bold text-white">Service Bookings</h3>
+                
+                {serviceBookings.map((booking) => (
+                  <Card key={booking.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                    <div className="flex justify-between items-start mb-4">
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-3 mb-2">
+                          <h4 className="text-white font-bold">{booking.service_type}</h4>
+                          <Badge className={`${
+                            booking.status === 'Completed' ? 'bg-green-500/20 text-green-300' :
+                            booking.status === 'In Progress' ? 'bg-blue-500/20 text-blue-300' :
+                            booking.status === 'Confirmed' ? 'bg-yellow-500/20 text-yellow-300' :
+                            'bg-gray-500/20 text-gray-300'
+                          }`}>
+                            {booking.status}
+                          </Badge>
+                        </div>
+                        <p className="text-white/60">{booking.residents?.name} • {booking.booking_date}</p>
+                        {booking.service_provider && <p className="text-white/70">Provider: {booking.service_provider}</p>}
+                        {booking.preferred_time && <p className="text-white/70">Preferred time: {booking.preferred_time}</p>}
+                        {booking.description && <p className="text-white/60 text-sm mt-1">{booking.description}</p>}
+                      </div>
+                      <div className="flex space-x-2">
+                        {booking.status === 'Requested' && (
+                          <Button
+                            onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'Confirmed')}
+                            size="sm"
+                            variant="outline"
+                            className="border-green-500/30 text-green-300 hover:bg-green-500/10"
+                          >
+                            Confirm
+                          </Button>
+                        )}
+                        {booking.status === 'Confirmed' && (
+                          <Button
+                            onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'In Progress')}
+                            size="sm"
+                            variant="outline"
+                            className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
+                          >
+                            Start
+                          </Button>
+                        )}
+                        {booking.status === 'In Progress' && (
+                          <Button
+                            onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'Completed')}
+                            size="sm"
+                            variant="outline"
+                            className="border-green-500/30 text-green-300 hover:bg-green-500/10"
+                          >
+                            Complete
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </Card>

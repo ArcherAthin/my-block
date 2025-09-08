@@ -7,10 +7,10 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "13.0.4"
   }
   public: {
     Tables: {
@@ -85,6 +85,94 @@ export type Database = {
           },
           {
             foreignKeyName: "bills_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      complaints: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          priority: string | null
+          resident_id: string | null
+          status: string | null
+          subject: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string | null
+          resident_id?: string | null
+          status?: string | null
+          subject: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          priority?: string | null
+          resident_id?: string | null
+          status?: string | null
+          subject?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "complaints_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      facility_bookings: {
+        Row: {
+          booking_date: string
+          created_at: string
+          end_time: string
+          facility_name: string
+          id: string
+          notes: string | null
+          resident_id: string | null
+          start_time: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_date: string
+          created_at?: string
+          end_time: string
+          facility_name: string
+          id?: string
+          notes?: string | null
+          resident_id?: string | null
+          start_time: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_date?: string
+          created_at?: string
+          end_time?: string
+          facility_name?: string
+          id?: string
+          notes?: string | null
+          resident_id?: string | null
+          start_time?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "facility_bookings_resident_id_fkey"
             columns: ["resident_id"]
             isOneToOne: false
             referencedRelation: "residents"
@@ -184,6 +272,53 @@ export type Database = {
           user_id?: string | null
         }
         Relationships: []
+      }
+      service_bookings: {
+        Row: {
+          booking_date: string
+          created_at: string
+          description: string | null
+          id: string
+          preferred_time: string | null
+          resident_id: string | null
+          service_provider: string | null
+          service_type: string
+          status: string | null
+          updated_at: string
+        }
+        Insert: {
+          booking_date: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          preferred_time?: string | null
+          resident_id?: string | null
+          service_provider?: string | null
+          service_type: string
+          status?: string | null
+          updated_at?: string
+        }
+        Update: {
+          booking_date?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          preferred_time?: string | null
+          resident_id?: string | null
+          service_provider?: string | null
+          service_type?: string
+          status?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_bookings_resident_id_fkey"
+            columns: ["resident_id"]
+            isOneToOne: false
+            referencedRelation: "residents"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

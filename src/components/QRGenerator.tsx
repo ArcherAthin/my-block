@@ -23,6 +23,7 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
   const generateQRCode = async () => {
     setIsGenerating(true);
     try {
+      // Generate dummy QR code for illustration
       const qrData = JSON.stringify({
         visitorId: visitorData.id,
         visitDate: visitorData.visitDate,
@@ -32,34 +33,56 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
 
       console.log('Generating QR for data:', qrData);
 
-      // Create a data URL with the QR data
-      const dataUrl = `data:text/plain;base64,${btoa(qrData)}`;
-      
-      // Use Dub.co API to generate QR code
-      const apiUrl = `https://api.dub.co/qr?url=${encodeURIComponent(dataUrl)}&size=300`;
-      console.log('API URL:', apiUrl);
-      
-      const response = await fetch(apiUrl);
-      
-      if (!response.ok) {
-        throw new Error(`Failed to generate QR code: ${response.status} ${response.statusText}`);
-      }
+      // Create a simple dummy QR code SVG
+      const dummyQRSvg = `
+        <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
+          <rect width="300" height="300" fill="white"/>
+          <!-- QR pattern simulation -->
+          <rect x="20" y="20" width="30" height="30" fill="black"/>
+          <rect x="60" y="20" width="10" height="30" fill="black"/>
+          <rect x="80" y="20" width="20" height="30" fill="black"/>
+          <rect x="110" y="20" width="10" height="30" fill="black"/>
+          <rect x="250" y="20" width="30" height="30" fill="black"/>
+          
+          <rect x="20" y="60" width="10" height="10" fill="black"/>
+          <rect x="40" y="60" width="10" height="10" fill="black"/>
+          <rect x="250" y="60" width="10" height="10" fill="black"/>
+          <rect x="270" y="60" width="10" height="10" fill="black"/>
+          
+          <rect x="20" y="250" width="30" height="30" fill="black"/>
+          <rect x="60" y="250" width="10" height="30" fill="black"/>
+          
+          <!-- Center pattern -->
+          <rect x="130" y="130" width="40" height="40" fill="black"/>
+          <rect x="140" y="140" width="20" height="20" fill="white"/>
+          <rect x="145" y="145" width="10" height="10" fill="black"/>
+          
+          <!-- Random QR-like pattern -->
+          <rect x="70" y="70" width="10" height="10" fill="black"/>
+          <rect x="90" y="70" width="10" height="10" fill="black"/>
+          <rect x="110" y="70" width="10" height="10" fill="black"/>
+          <rect x="70" y="90" width="10" height="10" fill="black"/>
+          <rect x="110" y="90" width="10" height="10" fill="black"/>
+          <rect x="200" y="70" width="10" height="10" fill="black"/>
+          <rect x="220" y="70" width="10" height="10" fill="black"/>
+          <rect x="200" y="90" width="10" height="10" fill="black"/>
+          <rect x="220" y="90" width="10" height="10" fill="black"/>
+          
+          <text x="150" y="295" text-anchor="middle" fill="black" font-size="8" font-family="Arial">Demo QR Code</text>
+        </svg>
+      `;
 
-      // Get the QR code as blob and convert to data URL
-      const blob = await response.blob();
-      
-      // Convert blob to data URL for display and download
+      // Convert SVG to data URL
+      const svgBlob = new Blob([dummyQRSvg], { type: 'image/svg+xml' });
       const reader = new FileReader();
+      
       reader.onload = () => {
         const result = reader.result as string;
         setQrCodeDataURL(result);
-        console.log('QR code generated successfully');
+        console.log('Dummy QR code generated successfully');
       };
-      reader.onerror = () => {
-        console.error('Error reading QR code blob');
-        throw new Error('Failed to process QR code image');
-      };
-      reader.readAsDataURL(blob);
+      
+      reader.readAsDataURL(svgBlob);
 
     } catch (error) {
       console.error('Error generating QR code:', error);
