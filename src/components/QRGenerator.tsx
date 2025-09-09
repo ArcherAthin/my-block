@@ -23,7 +23,7 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
   const generateQRCode = async () => {
     setIsGenerating(true);
     try {
-      // Generate dummy QR code for illustration
+      // Use the uploaded dummy QR code image
       const qrData = JSON.stringify({
         visitorId: visitorData.id,
         visitDate: visitorData.visitDate,
@@ -33,56 +33,9 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
 
       console.log('Generating QR for data:', qrData);
 
-      // Create a simple dummy QR code SVG
-      const dummyQRSvg = `
-        <svg width="300" height="300" viewBox="0 0 300 300" xmlns="http://www.w3.org/2000/svg">
-          <rect width="300" height="300" fill="white"/>
-          <!-- QR pattern simulation -->
-          <rect x="20" y="20" width="30" height="30" fill="black"/>
-          <rect x="60" y="20" width="10" height="30" fill="black"/>
-          <rect x="80" y="20" width="20" height="30" fill="black"/>
-          <rect x="110" y="20" width="10" height="30" fill="black"/>
-          <rect x="250" y="20" width="30" height="30" fill="black"/>
-          
-          <rect x="20" y="60" width="10" height="10" fill="black"/>
-          <rect x="40" y="60" width="10" height="10" fill="black"/>
-          <rect x="250" y="60" width="10" height="10" fill="black"/>
-          <rect x="270" y="60" width="10" height="10" fill="black"/>
-          
-          <rect x="20" y="250" width="30" height="30" fill="black"/>
-          <rect x="60" y="250" width="10" height="30" fill="black"/>
-          
-          <!-- Center pattern -->
-          <rect x="130" y="130" width="40" height="40" fill="black"/>
-          <rect x="140" y="140" width="20" height="20" fill="white"/>
-          <rect x="145" y="145" width="10" height="10" fill="black"/>
-          
-          <!-- Random QR-like pattern -->
-          <rect x="70" y="70" width="10" height="10" fill="black"/>
-          <rect x="90" y="70" width="10" height="10" fill="black"/>
-          <rect x="110" y="70" width="10" height="10" fill="black"/>
-          <rect x="70" y="90" width="10" height="10" fill="black"/>
-          <rect x="110" y="90" width="10" height="10" fill="black"/>
-          <rect x="200" y="70" width="10" height="10" fill="black"/>
-          <rect x="220" y="70" width="10" height="10" fill="black"/>
-          <rect x="200" y="90" width="10" height="10" fill="black"/>
-          <rect x="220" y="90" width="10" height="10" fill="black"/>
-          
-          <text x="150" y="295" text-anchor="middle" fill="black" font-size="8" font-family="Arial">Demo QR Code</text>
-        </svg>
-      `;
-
-      // Convert SVG to data URL
-      const svgBlob = new Blob([dummyQRSvg], { type: 'image/svg+xml' });
-      const reader = new FileReader();
-      
-      reader.onload = () => {
-        const result = reader.result as string;
-        setQrCodeDataURL(result);
-        console.log('Dummy QR code generated successfully');
-      };
-      
-      reader.readAsDataURL(svgBlob);
+      // Use the uploaded QR code image
+      setQrCodeDataURL('/lovable-uploads/94fd3526-a3fd-4b74-9be3-bf91f4f00592.png');
+      console.log('Dummy QR code loaded successfully');
 
     } catch (error) {
       console.error('Error generating QR code:', error);
