@@ -1,6 +1,5 @@
 
-import { db } from './firebase';
-import { collection, addDoc, doc, updateDoc, onSnapshot, query, where, orderBy } from 'firebase/firestore';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface VisitorData {
   id?: string;
@@ -17,12 +16,26 @@ export interface VisitorData {
 
 export const createVisitor = async (visitorData: Omit<VisitorData, 'id' | 'createdAt' | 'status'>) => {
   try {
-    const docRef = await addDoc(collection(db, 'scheduled_visits'), {
-      ...visitorData,
-      status: 'pending',
-      createdAt: new Date().toISOString()
-    });
-    return { success: true, id: docRef.id };
+    const { data, error } = await supabase
+      .from('scheduled_visits')
+      .insert({
+        visitor_name: visitorData.visitorName,
+        resident_name: visitorData.residentName,
+        phone: visitorData.phone,
+        purpose: visitorData.purpose,
+        visit_date: visitorData.visitDate,
+        visit_time: visitorData.visitTime,
+        status: 'pending'
+      })
+      .select()
+      .single();
+
+    if (error) {
+      console.error('Error creating visitor:', error);
+      return { success: false, error };
+    }
+
+    return { success: true, id: data.id };
   } catch (error) {
     console.error('Error creating visitor:', error);
     return { success: false, error };
@@ -32,9 +45,18 @@ export const createVisitor = async (visitorData: Omit<VisitorData, 'id' | 'creat
 export const updateVisitorStatus = async (id: string, status: VisitorData['status'], usedAt?: string) => {
   try {
     const updateData: any = { status };
-    if (usedAt) updateData.usedAt = usedAt;
+    if (usedAt) updateData.used_at = usedAt;
     
-    await updateDoc(doc(db, 'scheduled_visits', id), updateData);
+    const { error } = await supabase
+      .from('scheduled_visits')
+      .update(updateData)
+      .eq('id', id);
+
+    if (error) {
+      console.error('Error updating visitor status:', error);
+      return { success: false, error };
+    }
+
     return { success: true };
   } catch (error) {
     console.error('Error updating visitor status:', error);
@@ -46,24 +68,53 @@ export const subscribeToVisitors = (
   callback: (visitors: VisitorData[]) => void,
   filterDate?: string
 ) => {
-  let q = query(
-    collection(db, 'scheduled_visits'),
-    orderBy('createdAt', 'desc')
-  );
+  let query = supabase
+    .from('scheduled_visits')
+    .select('*')
+    .order('created_at', { ascending: false });
 
   if (filterDate) {
-    q = query(
-      collection(db, 'scheduled_visits'),
-      where('visitDate', '==', filterDate),
-      orderBy('createdAt', 'desc')
-    );
+    query = query.eq('visit_date', filterDate);
   }
 
-  return onSnapshot(q, (snapshot) => {
-    const visitors = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    } as VisitorData));
-    callback(visitors);
+  const subscription = query.subscribe((payload) => {
+    if (payload.eventType === 'SELECT' && payload.new) {
+      const visitors = payload.new.map((row: any) => ({
+        id: row.id,
+        visitorName: row.visitor_name,
+        residentName: row.resident_name,
+        phone: row.phone,
+        purpose: row.purpose,
+        visitDate: row.visit_date,
+        visitTime: row.visit_time,
+        status: row.status,
+        createdAt: row.created_at,
+        usedAt: row.used_at
+      } as VisitorData));
+      callback(visitors);
+    }
   });
+
+  // Initial fetch
+  query.then(({ data, error }) => {
+    if (!error && data) {
+      const visitors = data.map((row: any) => ({
+        id: row.id,
+        visitorName: row.visitor_name,
+        residentName: row.resident_name,
+        phone: row.phone,
+        purpose: row.purpose,
+        visitDate: row.visit_date,
+        visitTime: row.visit_time,
+        status: row.status,
+        createdAt: row.created_at,
+        usedAt: row.used_at
+      } as VisitorData));
+      callback(visitors);
+    }
+  });
+
+  return () => {
+    subscription.unsubscribe();
+  };
 };
