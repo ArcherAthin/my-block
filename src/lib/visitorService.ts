@@ -68,35 +68,19 @@ export const subscribeToVisitors = (
   callback: (visitors: VisitorData[]) => void,
   filterDate?: string
 ) => {
-  let query = supabase
-    .from('scheduled_visits')
-    .select('*')
-    .order('created_at', { ascending: false });
-
-  if (filterDate) {
-    query = query.eq('visit_date', filterDate);
-  }
-
-  const subscription = query.subscribe((payload) => {
-    if (payload.eventType === 'SELECT' && payload.new) {
-      const visitors = payload.new.map((row: any) => ({
-        id: row.id,
-        visitorName: row.visitor_name,
-        residentName: row.resident_name,
-        phone: row.phone,
-        purpose: row.purpose,
-        visitDate: row.visit_date,
-        visitTime: row.visit_time,
-        status: row.status,
-        createdAt: row.created_at,
-        usedAt: row.used_at
-      } as VisitorData));
-      callback(visitors);
-    }
-  });
-
   // Initial fetch
-  query.then(({ data, error }) => {
+  const fetchVisitors = async () => {
+    let query = supabase
+      .from('scheduled_visits')
+      .select('*')
+      .order('created_at', { ascending: false });
+
+    if (filterDate) {
+      query = query.eq('visit_date', filterDate);
+    }
+
+    const { data, error } = await query;
+
     if (!error && data) {
       const visitors = data.map((row: any) => ({
         id: row.id,
@@ -112,9 +96,30 @@ export const subscribeToVisitors = (
       } as VisitorData));
       callback(visitors);
     }
-  });
+  };
 
+  // Set up real-time subscription
+  const channel = supabase
+    .channel('scheduled_visits_changes')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'scheduled_visits'
+      },
+      () => {
+        // Re-fetch data when any change occurs
+        fetchVisitors();
+      }
+    )
+    .subscribe();
+
+  // Initial fetch
+  fetchVisitors();
+
+  // Return unsubscribe function
   return () => {
-    subscription.unsubscribe();
+    supabase.removeChannel(channel);
   };
 };

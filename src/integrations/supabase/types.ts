@@ -273,6 +273,48 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_visits: {
+        Row: {
+          created_at: string
+          id: string
+          phone: string
+          purpose: string
+          resident_name: string
+          status: string | null
+          updated_at: string
+          used_at: string | null
+          visit_date: string
+          visit_time: string
+          visitor_name: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          phone: string
+          purpose: string
+          resident_name: string
+          status?: string | null
+          updated_at?: string
+          used_at?: string | null
+          visit_date: string
+          visit_time: string
+          visitor_name: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          phone?: string
+          purpose?: string
+          resident_name?: string
+          status?: string | null
+          updated_at?: string
+          used_at?: string | null
+          visit_date?: string
+          visit_time?: string
+          visitor_name?: string
+        }
+        Relationships: []
+      }
       service_bookings: {
         Row: {
           booking_date: string
