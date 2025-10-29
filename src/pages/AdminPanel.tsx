@@ -493,53 +493,59 @@ const AdminPanel = () => {
               <div className="space-y-6">
                 <h3 className="text-xl font-bold text-white">Resident Complaints</h3>
                 
-                {complaints.map((complaint) => (
-                  <Card key={complaint.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h4 className="text-white font-bold">{complaint.subject}</h4>
-                          <Badge className={`${
-                            complaint.status === 'Resolved' ? 'bg-green-500/20 text-green-300' :
-                            complaint.status === 'In Review' ? 'bg-yellow-500/20 text-yellow-300' :
-                            'bg-red-500/20 text-red-300'
-                          }`}>
-                            {complaint.status}
-                          </Badge>
-                          <Badge className={`${
-                            complaint.priority === 'High' ? 'bg-red-500/20 text-red-300' :
-                            complaint.priority === 'Medium' ? 'bg-yellow-500/20 text-yellow-300' :
-                            'bg-gray-500/20 text-gray-300'
-                          }`}>
-                            {complaint.priority}
-                          </Badge>
-                        </div>
-                        <p className="text-white/70 mb-2">{complaint.description}</p>
-                        <div className="text-white/60 text-sm">
-                          Resident: {complaint.resident} • {complaint.date} • ID: #{complaint.id}
-                        </div>
-                      </div>
-                      
-                      <div className="ml-6 space-x-2">
-                        <Button
-                          onClick={() => updateComplaintStatus(complaint.id, 'In Review')}
-                          size="sm"
-                          variant="outline"
-                          className="border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/10"
-                        >
-                          Review
-                        </Button>
-                        <Button
-                          onClick={() => updateComplaintStatus(complaint.id, 'Resolved')}
-                          size="sm"
-                          className="bg-gradient-to-r from-[#10b981] to-[#059669] text-white"
-                        >
-                          Resolve
-                        </Button>
-                      </div>
-                    </div>
+                {complaints.length === 0 ? (
+                  <Card className="p-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                    <p className="text-white/70 text-center">No complaints submitted yet</p>
                   </Card>
-                ))}
+                ) : (
+                  complaints.map((complaint) => (
+                    <Card key={complaint.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="text-white font-bold">{complaint.subject}</h4>
+                            <Badge className={`${
+                              complaint.status === 'Resolved' ? 'bg-green-500/20 text-green-300' :
+                              complaint.status === 'In Review' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-red-500/20 text-red-300'
+                            }`}>
+                              {complaint.status}
+                            </Badge>
+                            <Badge className={`${
+                              complaint.priority === 'High' ? 'bg-red-500/20 text-red-300' :
+                              complaint.priority === 'Medium' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-gray-500/20 text-gray-300'
+                            }`}>
+                              {complaint.priority}
+                            </Badge>
+                          </div>
+                          <p className="text-white/70 mb-2">{complaint.description}</p>
+                          <div className="text-white/60 text-sm">
+                            Resident: {complaint.residents?.name || 'Unknown'} • {new Date(complaint.created_at).toLocaleDateString()}
+                          </div>
+                        </div>
+                        
+                        <div className="ml-6 space-x-2">
+                          <Button
+                            onClick={() => updateComplaintStatus(complaint.id, 'In Review')}
+                            size="sm"
+                            variant="outline"
+                            className="border-yellow-500/30 text-yellow-300 hover:bg-yellow-500/10"
+                          >
+                            Review
+                          </Button>
+                          <Button
+                            onClick={() => updateComplaintStatus(complaint.id, 'Resolved')}
+                            size="sm"
+                            className="bg-gradient-to-r from-[#10b981] to-[#059669] text-white"
+                          >
+                            Resolve
+                          </Button>
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
               </div>
             )}
 
@@ -547,49 +553,55 @@ const AdminPanel = () => {
               <div className="space-y-6">
                 <h3 className="text-xl font-bold text-white">Facility Bookings</h3>
                 
-                {facilityBookings.map((booking) => (
-                  <Card key={booking.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h4 className="text-white font-bold">{booking.facility_name}</h4>
-                          <Badge className={`${
-                            booking.status === 'Approved' ? 'bg-green-500/20 text-green-300' :
-                            booking.status === 'Pending' ? 'bg-yellow-500/20 text-yellow-300' :
-                            'bg-red-500/20 text-red-300'
-                          }`}>
-                            {booking.status}
-                          </Badge>
-                        </div>
-                        <p className="text-white/60">{booking.residents?.name} • {booking.booking_date}</p>
-                        <p className="text-white/70 mt-2">{booking.start_time} - {booking.end_time}</p>
-                        {booking.notes && <p className="text-white/60 text-sm mt-1">{booking.notes}</p>}
-                      </div>
-                      <div className="flex space-x-2">
-                        {booking.status === 'Pending' && (
-                          <>
-                            <Button
-                              onClick={() => updateBookingStatus(booking.id, 'facility_bookings', 'Approved')}
-                              size="sm"
-                              variant="outline"
-                              className="border-green-500/30 text-green-300 hover:bg-green-500/10"
-                            >
-                              Approve
-                            </Button>
-                            <Button
-                              onClick={() => updateBookingStatus(booking.id, 'facility_bookings', 'Rejected')}
-                              size="sm"
-                              variant="outline"
-                              className="border-red-500/30 text-red-300 hover:bg-red-500/10"
-                            >
-                              Reject
-                            </Button>
-                          </>
-                        )}
-                      </div>
-                    </div>
+                {facilityBookings.length === 0 ? (
+                  <Card className="p-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                    <p className="text-white/70 text-center">No facility bookings submitted yet</p>
                   </Card>
-                ))}
+                ) : (
+                  facilityBookings.map((booking) => (
+                    <Card key={booking.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="text-white font-bold">{booking.facility_name}</h4>
+                            <Badge className={`${
+                              booking.status === 'Approved' ? 'bg-green-500/20 text-green-300' :
+                              booking.status === 'Pending' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-red-500/20 text-red-300'
+                            }`}>
+                              {booking.status}
+                            </Badge>
+                          </div>
+                          <p className="text-white/60">{booking.residents?.name || 'Unknown'} • {new Date(booking.booking_date).toLocaleDateString()}</p>
+                          <p className="text-white/70 mt-2">{booking.start_time} - {booking.end_time}</p>
+                          {booking.notes && <p className="text-white/60 text-sm mt-1">{booking.notes}</p>}
+                        </div>
+                        <div className="flex space-x-2">
+                          {booking.status === 'Pending' && (
+                            <>
+                              <Button
+                                onClick={() => updateBookingStatus(booking.id, 'facility_bookings', 'Approved')}
+                                size="sm"
+                                variant="outline"
+                                className="border-green-500/30 text-green-300 hover:bg-green-500/10"
+                              >
+                                Approve
+                              </Button>
+                              <Button
+                                onClick={() => updateBookingStatus(booking.id, 'facility_bookings', 'Rejected')}
+                                size="sm"
+                                variant="outline"
+                                className="border-red-500/30 text-red-300 hover:bg-red-500/10"
+                              >
+                                Reject
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
               </div>
             )}
 
@@ -597,61 +609,67 @@ const AdminPanel = () => {
               <div className="space-y-6">
                 <h3 className="text-xl font-bold text-white">Service Bookings</h3>
                 
-                {serviceBookings.map((booking) => (
-                  <Card key={booking.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
-                    <div className="flex justify-between items-start mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center space-x-3 mb-2">
-                          <h4 className="text-white font-bold">{booking.service_type}</h4>
-                          <Badge className={`${
-                            booking.status === 'Completed' ? 'bg-green-500/20 text-green-300' :
-                            booking.status === 'In Progress' ? 'bg-blue-500/20 text-blue-300' :
-                            booking.status === 'Confirmed' ? 'bg-yellow-500/20 text-yellow-300' :
-                            'bg-gray-500/20 text-gray-300'
-                          }`}>
-                            {booking.status}
-                          </Badge>
-                        </div>
-                        <p className="text-white/60">{booking.residents?.name} • {booking.booking_date}</p>
-                        {booking.service_provider && <p className="text-white/70">Provider: {booking.service_provider}</p>}
-                        {booking.preferred_time && <p className="text-white/70">Preferred time: {booking.preferred_time}</p>}
-                        {booking.description && <p className="text-white/60 text-sm mt-1">{booking.description}</p>}
-                      </div>
-                      <div className="flex space-x-2">
-                        {booking.status === 'Requested' && (
-                          <Button
-                            onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'Confirmed')}
-                            size="sm"
-                            variant="outline"
-                            className="border-green-500/30 text-green-300 hover:bg-green-500/10"
-                          >
-                            Confirm
-                          </Button>
-                        )}
-                        {booking.status === 'Confirmed' && (
-                          <Button
-                            onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'In Progress')}
-                            size="sm"
-                            variant="outline"
-                            className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
-                          >
-                            Start
-                          </Button>
-                        )}
-                        {booking.status === 'In Progress' && (
-                          <Button
-                            onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'Completed')}
-                            size="sm"
-                            variant="outline"
-                            className="border-green-500/30 text-green-300 hover:bg-green-500/10"
-                          >
-                            Complete
-                          </Button>
-                        )}
-                      </div>
-                    </div>
+                {serviceBookings.length === 0 ? (
+                  <Card className="p-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                    <p className="text-white/70 text-center">No service bookings submitted yet</p>
                   </Card>
-                ))}
+                ) : (
+                  serviceBookings.map((booking) => (
+                    <Card key={booking.id} className="p-6 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl">
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center space-x-3 mb-2">
+                            <h4 className="text-white font-bold">{booking.service_type}</h4>
+                            <Badge className={`${
+                              booking.status === 'Completed' ? 'bg-green-500/20 text-green-300' :
+                              booking.status === 'In Progress' ? 'bg-blue-500/20 text-blue-300' :
+                              booking.status === 'Confirmed' ? 'bg-yellow-500/20 text-yellow-300' :
+                              'bg-gray-500/20 text-gray-300'
+                            }`}>
+                              {booking.status}
+                            </Badge>
+                          </div>
+                          <p className="text-white/60">{booking.residents?.name || 'Unknown'} • {new Date(booking.booking_date).toLocaleDateString()}</p>
+                          {booking.service_provider && <p className="text-white/70">Provider: {booking.service_provider}</p>}
+                          {booking.preferred_time && <p className="text-white/70">Preferred time: {booking.preferred_time}</p>}
+                          {booking.description && <p className="text-white/60 text-sm mt-1">{booking.description}</p>}
+                        </div>
+                        <div className="flex space-x-2">
+                          {booking.status === 'Requested' && (
+                            <Button
+                              onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'Confirmed')}
+                              size="sm"
+                              variant="outline"
+                              className="border-green-500/30 text-green-300 hover:bg-green-500/10"
+                            >
+                              Confirm
+                            </Button>
+                          )}
+                          {booking.status === 'Confirmed' && (
+                            <Button
+                              onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'In Progress')}
+                              size="sm"
+                              variant="outline"
+                              className="border-blue-500/30 text-blue-300 hover:bg-blue-500/10"
+                            >
+                              Start
+                            </Button>
+                          )}
+                          {booking.status === 'In Progress' && (
+                            <Button
+                              onClick={() => updateBookingStatus(booking.id, 'service_bookings', 'Completed')}
+                              size="sm"
+                              variant="outline"
+                              className="border-green-500/30 text-green-300 hover:bg-green-500/10"
+                            >
+                              Complete
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                    </Card>
+                  ))
+                )}
               </div>
             )}
           </div>
