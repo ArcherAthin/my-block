@@ -367,10 +367,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      generate_resident_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
+      generate_resident_number: { Args: never; Returns: string }
     }
     Enums: {
       [_ in never]: never
