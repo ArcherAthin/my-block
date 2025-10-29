@@ -4,6 +4,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { QrCode, Download } from 'lucide-react';
+import QRCode from 'qrcode';
 
 interface QRGeneratorProps {
   visitorData: {
@@ -20,22 +21,38 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
   const [qrCodeDataURL, setQrCodeDataURL] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
 
+  useEffect(() => {
+    // Auto-generate QR code when component mounts
+    generateQRCode();
+  }, [visitorData.id]);
+
   const generateQRCode = async () => {
     setIsGenerating(true);
     try {
-      // Use the uploaded dummy QR code image
       const qrData = JSON.stringify({
         visitorId: visitorData.id,
+        visitorName: visitorData.visitorName,
+        residentName: visitorData.residentName,
         visitDate: visitorData.visitDate,
+        visitTime: visitorData.visitTime,
         purpose: visitorData.purpose,
         timestamp: new Date().toISOString()
       });
 
       console.log('Generating QR for data:', qrData);
 
-      // Use the uploaded QR code image
-      setQrCodeDataURL('/lovable-uploads/94fd3526-a3fd-4b74-9be3-bf91f4f00592.png');
-      console.log('Dummy QR code loaded successfully');
+      // Generate actual QR code using qrcode library
+      const qrCodeUrl = await QRCode.toDataURL(qrData, {
+        width: 300,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
+      });
+
+      setQrCodeDataURL(qrCodeUrl);
+      console.log('QR code generated successfully');
 
     } catch (error) {
       console.error('Error generating QR code:', error);
@@ -67,18 +84,12 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
             </Badge>
           </div>
 
-          {!qrCodeDataURL ? (
-            <div className="text-center">
-              <Button
-                onClick={generateQRCode}
-                disabled={isGenerating}
-                className="bg-gradient-to-r from-[#10b981] to-[#059669] text-white hover:scale-105 transition-all duration-300"
-              >
-                <QrCode className="w-4 h-4 mr-2" />
-                {isGenerating ? 'Generating...' : 'Generate QR Code'}
-              </Button>
+          {isGenerating ? (
+            <div className="text-center py-8">
+              <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-white mb-4"></div>
+              <p className="text-white/70">Generating QR Code...</p>
             </div>
-          ) : (
+          ) : qrCodeDataURL ? (
             <div className="space-y-4">
               <div className="flex justify-center">
                 <div className="bg-white p-4 rounded-2xl shadow-lg">
@@ -86,10 +97,6 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
                     src={qrCodeDataURL} 
                     alt="Visitor QR Code"
                     className="w-64 h-64 object-contain"
-                    onError={(e) => {
-                      console.error('Error loading QR code image:', e);
-                      alert('Failed to display QR code image');
-                    }}
                   />
                 </div>
               </div>
@@ -108,7 +115,7 @@ const QRGenerator: React.FC<QRGeneratorProps> = ({ visitorData }) => {
                 </Button>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="bg-white/10 rounded-lg p-4 space-y-2">
             <h4 className="text-white font-medium">Visit Details:</h4>
